@@ -1,7 +1,7 @@
 
 **_Issues Faced by us on executing the claires file._**
 
-**_Preliminary asumption as to where the problem might be is that the site or the link redirects us to "http://www.claires.co.uk" due to location difference._**
+**_The Claires code was not running because of the VPN issue._**
 
 Note: **We are running Futura on python3.5**
 
