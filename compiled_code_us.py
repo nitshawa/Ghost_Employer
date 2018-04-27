@@ -7,6 +7,8 @@ import csv
 import mysql.connector
 import json
 import ast
+import datetime
+from dateutil import parser
 reload(sys)
 sys.setdefaultencoding("utf-8")
 cnx = mysql.connector.connect(
@@ -22,7 +24,7 @@ cursor = cnx.cursor()
 
 day_list = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 days_hours = {}
-stop_words = ['open','store','pharmacy','operation','investments','mortgage','trust','sales','of','the','for','more','holiday','christmas','parts','service','gym','kids','club','new','year\'s day','staffed','teller','lobby','drive','thru','branch','dining','room','stores','bank','lobby','served ','dine in','dine','vehicle','certified ','produce','deli','bakery','seafood','carryout','delivery','finance','car','parts','used']
+stop_words = ['store','pharmacy','operation','investments','mortgage','trust','sales','of','the','for','more','holiday','christmas','parts','service','gym','kids','club','new','year\'s day','staffed','teller','lobby','drive','thru','branch','dining','room','stores','bank','lobby','served ','dine in','dine','vehicle','certified ','produce','deli','bakery','seafood','carryout','delivery','finance','car','parts','used', '!', 'currently', 'temporarily', 'reopening']
 # todo, make into ordered dict to ensure the waterfall is adhered to
 replacements = {
     'mon': ['monday', 'montag', 'lundi', 'lunes', 'mon-mon', 'mo ', 'mo:'],
@@ -32,7 +34,7 @@ replacements = {
     'wed': ['wednesday', 'mittwoch', 'mercredi', 'mircoles', 'wed-wed', 'wen','we ','we:'],
     'wed-':['we-'],
 
-    'thu': ['thursday', 'donnerstag', 'jeudi', 'jueves', 'thurs', 'thur','thr', 'thu-thu', 'th ','th-', 'th:'],
+    'thu': ['thursday', 'donnerstag', 'jeudi', 'jueves', 'thurs', 'thur','thr', 'thu-thu', 'th ','th-', 'th:'],#, 'th'], # 'th' is making sometime breaks the code like in Bonefish, HEB foods, when day expention is required
     'thu-':['th-'],
 
     'fri': ['friday', 'freitag', 'vendredi', 'viernes', 'fir','fri-fri',  'fr ', 'fr-',  'fr:'],
@@ -51,12 +53,12 @@ replacements = {
     "mon-fri": ['mo-fr'],
     # ' to ': [' a '],
     'mon-sun' : ['daily','every day', 'everyday', 'all week', '7 days a week', 'seven days a week', '7 days', 'per day', '7days'],
-    '[]': ['closed - closed', 'closed-closed', 'close - close', 'close-close', 'closed', 'close'],
+    '[]': ['closed - closed', 'closed-closed', 'closed:closed', 'close - close', 'close-close', 'closed', 'close'],
     'mon-fri': ['weekday_hours', 'weekday', 'weekdays', 'm-f'], #for simmons bank only one m-f
-    ' ': ['_hours', 'hrs', 'black', ' (est)', 'open'],
+    ' ': ['_hours', 'hrs', 'black', ' (est)', 'open', '-none'],
     # ', ': ['/'],
-    '&': ['\u0026'],
-    'mon-sun : 00:00-00:00':['24/7'],
+    '&': ['\u0026', 'and'],
+    'mon-sun : 00:00-00:00':['24/7', 'open 24 hours'],
     '00:00-00:00': ['24 hours','24:00rs', '24:00urs', '24:00urs', '24:00s', '24 hrs'],
      '-': [' through ', ' to ', ' thuough ', '\xe2\x80\x93'],
        # '00:00': ['24:00'],
@@ -72,9 +74,21 @@ def remove_html_tags(value):
   clean_value = re.sub(tags, '', value)
   return clean_value
 
+def replace_24_by_7(value):
+    replacement_7days = {'mon-sun : 00:00-00:00':['24/7', 'open 24 hours']}
+    value = value.lower()
+    for (key, values) in replacement_7days.iteritems():
+        for rep in values:
+            try:
+                value = value.replace(rep, key)
+            except:
+                continue
+    return value
+
 
 def replace_keywords(value):
     value = remove_html_tags(value)
+    value = replace_24_by_7(value)
     value = value.lower()
     for (key, values) in replacements.iteritems():
         for rep in values:
@@ -176,7 +190,8 @@ def replace_with_unstructured_hours(matchobj):
 
 
 def replace_open_close_delimeter(value):
-    pattern = r'(\d{2}:\d{2})[\D]*(\d{2}:\d{2})'
+    # pattern = r'(\d{2}:\d{2})[\D]*(\d{2}:\d{2})'
+    pattern = r'(\d{2}:\d{2}[:\d{2}]*)[\D]*(\d{2}:\d{2}[:\d{2}]*)'
     # pattern = r'(\d{2}:\d{2})[\s-]*(\d{2}:\d{2})'
     return re.sub(pattern, replace_with_unstructured_hours, value)
 
@@ -221,12 +236,6 @@ def string_to_dict(value):
         days_hours[days] = hour
         indexer = end
     return days_hours
-
-
-def date_conversion(value):
-
-    formated_date = parser.parse(date).strftime('%Y-%m-%d')
-    return datetime.datetime.strptime(formated_date, '%Y-%m-%d').strftime('%A')
 
 
 def day_expand(days_hours):
@@ -343,7 +352,9 @@ def check_string_for_date(value):
     value = re.sub(pattern, formated_date, value)
     return value
 
-def formated_output_dict(value):
+
+
+def debug_formated_output_dict(value):
     print value
     print '-'*100
     formated_output = {}
@@ -351,7 +362,7 @@ def formated_output_dict(value):
 
         if isinstance(val, unicode):
 
-            value = re.sub(r'(\d{2}:\d{2}),(\d{2}:\d{2})', r"'\1','\2'", val)
+            value = re.sub(r'(\d{2}:\d{2}[:\d{2}]*),(\d{2}:\d{2}[:\d{2}]*)', r"'\1','\2'", val)
             value = ast.literal_eval(value)
 
             formated_output[key] = value
@@ -361,6 +372,47 @@ def formated_output_dict(value):
     print 'formated_output', formated_output
     print
     return formated_output
+
+def formated_output_dict(value):
+    final_output = []
+    unique = set([x for x in value.values() if type(x) is not list ])
+    formated_output = {}
+    for unique_val in unique:
+        shared_keys = []
+
+        for key, val in value.iteritems():
+            if value[key] == unique_val:
+
+                shared_keys.append(key)
+        formated_output[unique_val] = shared_keys
+
+
+    for key, val in formated_output.iteritems():
+
+        time_blocks = re.findall(r'\(.*?\)', key)
+        for time_block in time_blocks:
+            combined_days = {}
+            start_time = re.search(r'\((\d{2}:\d{2}[:\d{2}]*)\,', time_block).group(1)
+            end_time = re.search(r',(\d{2}:\d{2}[:\d{2}]*)\)', time_block).group(1)
+            # combined_days['start_time'] ='{}:00'.format(start_time)
+            # combined_days['end_time'] = '{}:00'.format(end_time)
+            # combined_days['days'] = val
+            start_time = re.search(r'\((\d{2}:\d{2}[:\d{2}]*)\,', time_block).group(1)
+            end_time = re.search(r',(\d{2}:\d{2}[:\d{2}]*)\)', time_block).group(1)
+            if len(start_time) == 5: #if seconds are not available
+                combined_days['start_time'] ='{}:00'.format(start_time)
+            else:
+                combined_days['start_time'] ='{}'.format(start_time)
+            if len(end_time) == 5:
+                combined_days['end_time'] = '{}:00'.format(end_time)
+            else:
+                combined_days['end_time'] = '{}'.format(end_time)
+            combined_days['days'] = val
+            final_output.append(combined_days)
+
+    if len(final_output) == 0:
+        return ''
+    return final_output
 
 
 def main_test():
@@ -372,26 +424,32 @@ def main_test():
     # # for row in input_all_brands_list:
     # #     brand_name = row[0]
     # #     print brand_name
+    #from validated database
+    brand_name = 'H-E-B Foods'
     query = """
        SELECT * FROM O_O_DATA.scrapers_hoo
-       WHERE brand_name LIKE \"%"""+ "Noodles & Co" + """%\";
+       WHERE brand_name LIKE \"%"""+ brand_name + """%\";
         """
-    # and raw_business_hours like "%24:00-18:00%" limit 2
-    # # #    #AND country_code = "US";
-    # # # # print query
-    # # # # exit()
+    # # and raw_business_hours like "%24:00-18:00%" limit 2
+    # # # #    #AND country_code = "US";
+    # # # # # print query
+    # # # # # exit()
     cursor.execute(query)
 
-    output_csv = csv.writer(open( "Noodles & Co" + ' store_hours.csv', 'wb'))
+    output_csv = csv.writer(open( "/media/nitin/809E47539E4740C0/HD/TestCodes/hours_of_operation/testing/compiled_code_us/attemp2/" + brand_name + ' store_hours.csv', 'wb'))
     # output_csv.writerow(['input_string', 'output_dict', "unmatched"])
     output_csv.writerow(["brand_name", "store_name", "type", "address_1",
         "city", "state", "zipcode", "country_code", "phone_number",
          "primary_sic", "secondary_sic", "latitude", "longitude",
-         "raw_business_hours", "converted_business_hours", "brand_id", "raw_address", "updated_date", "url"])
+         "raw_business_hours", "debug_formated_business_hours","converted_business_hours", "brand_id", "raw_address", "updated_date", "url"])
 
+    # from convert sheets
+    # input_csv = csv.reader(open('/media/nitin/809E47539E4740C0/HD/TestCodes/hours_of_operation/testing/compiled_code_us/5_brands/Sample_4_brands.csv', 'rb'))
     # cursor_list = [
     # 'today: 6:00 am - 11:00 pm/ 6:00 am - 11:00 pm, tomorrow: 6:00 am - 11:00 pm thursday: 6:00 am - 11:00 pm friday: 6:00 am - 11:00 pm saturday: 6:00 am - 11:00 pm sunday: 6:00 am - 11:00 pm monday: 6:00 am - 11:00 pm']
     # # 'mon-06:00:24:00 tue-06:00:24:00 wed-06:00:24:00 thr-06:00:24:00 fri-06:00:24:00 sat-06:00:24:00 sun-06:00:24:00']
+    # cursor_list = [x for x in input_csv][1:]
+
     # for value in cursor_list:
     for value in cursor:
 
@@ -417,6 +475,11 @@ def main_test():
         raw_address = value[15]
         updated_date = value[16]
         url = value[17]
+        #for csv_indexes
+        # brand_id = value[15]
+        # raw_address = value[16]
+        # updated_date = value[17]
+        # url = value[18]
         if value is None:
             continue
         # value = value[13]  # Access tuple from dataset
@@ -437,7 +500,7 @@ def main_test():
             try:
                 y = check_string_for_date(value)
                 print 'befor replace_keywords', y
-                y = replace_keywords(value)
+                y = replace_keywords(y)
                 print 'after replace_keywords', y
                 # y = replace_french_from_to(y)
                 if 'today' in y:
@@ -462,6 +525,8 @@ def main_test():
                         y = day_expand(y)
                         # y = sorted_output(y)
                         print 'after day expantion : ', y
+                        debug_y = debug_formated_output_dict(y)
+                        print 'after debug_formated_output_dict : ', debug_y
                         y = formated_output_dict(y)
                         print 'after formated_output_dict : ', y
 
@@ -477,14 +542,16 @@ def main_test():
                 pass
         else:
             y = validated_check
+            debug_y = y
             not_matched = replace_hour_groups(y)
         # print y
         formated_business_hours = y
+        debug_formated_business_hours = debug_y
         # break
 
         # output_csv.writerow([' '.join(value.split()).encode('ascii', 'ignore'), y, ' '.join(not_matched.split())])
-        output_csv.writerow([brand_name, store_name, store_type, address_1, city, state, zipcode, country_code, phone_number, primary_sic, secondary_sic, latitude, longitude, raw_business_hours, formated_business_hours, brand_id, raw_address, updated_date, url])
-
+        output_csv.writerow([brand_name, store_name, store_type, address_1, city, state, zipcode, country_code, phone_number, primary_sic, secondary_sic, latitude, longitude, raw_business_hours, debug_formated_business_hours, formated_business_hours, brand_id, raw_address, updated_date, url])
+        # break
 def accuracy_csv():
         accuracy_csv = csv.reader(open("total_with_bad_updated"+ ' store_hours.csv', 'rb'))
         accuracy_csv = filter(None,[x for x in accuracy_csv][1:])
