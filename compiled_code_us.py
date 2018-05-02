@@ -34,7 +34,7 @@ replacements = {
     'wed': ['wednesday', 'mittwoch', 'mercredi', 'mircoles', 'wed-wed', 'wen','we ','we:'],
     'wed-':['we-'],
 
-    'thu': ['thursday', 'donnerstag', 'jeudi', 'jueves', 'thurs', 'thur','thr', 'thu-thu', 'th ','th-', 'th:'],#, 'th'], # 'th' is making sometime breaks the code like in Bonefish, HEB foods, when day expention is required
+    'thu': ['thursday', 'donnerstag', 'jeudi', 'jueves', 'thurs', 'thur','thr', 'thu-thu', 'th ','th-', 'th:'],#, 'th'], # 'th' is making sometime breaks the code like in Bonefish,  HEB foods, when day expention is required
     'thu-':['th-'],
 
     'fri': ['friday', 'freitag', 'vendredi', 'viernes', 'fir','fri-fri',  'fr ', 'fr-',  'fr:'],
@@ -50,16 +50,15 @@ replacements = {
     # 'pm': ['p.m', 'P.M.', 'PM', 'pm.', '-pm', 'p m', 'p.m.', 'pm'],
     "closed": ["zamkniety", "cerrado", "ferme", "geschlossen"],
     "open": ["otwarty", "abierto", "ouvert", "offen"],
-    "mon-fri": ['mo-fr'],
     # ' to ': [' a '],
-    'mon-sun' : ['daily','every day', 'everyday', 'all week', '7 days a week', 'seven days a week', '7 days', 'per day', '7days'],
+    'mon-sun ' : ['daily','every day', 'everyday', 'all week', '7 days a week', 'seven days a week', '7 days', 'per day', '7days'],
     '[]': ['closed - closed', 'closed-closed', 'closed:closed', 'close - close', 'close-close', 'closed', 'close'],
-    'mon-fri': ['weekday_hours', 'weekday', 'weekdays', 'm-f'], #for simmons bank only one m-f
+    'mon-fri ': ['weekday_hours', 'weekday', 'weekdays', 'mo-fr',  'mon-f ', 'm-f '], #for simmons bank only one m-f
     ' ': ['_hours', 'hrs', 'black', ' (est)', 'open', '-none'],
     # ', ': ['/'],
     '&': ['\u0026', 'and'],
     'mon-sun : 00:00-00:00':['24/7', 'open 24 hours'],
-    '00:00-00:00': ['24 hours','24:00rs', '24:00urs', '24:00urs', '24:00s', '24 hrs'],
+    '00:00-00:00': ['24 hours','24:00rs', '24:00urs', '24:00urs', '24:00s', '24 hrs', 'all day', 'all:day'],
      '-': [' through ', ' to ', ' thuough ', '\xe2\x80\x93'],
        # '00:00': ['24:00'],
        # '00:30': ['24:30'],
@@ -110,13 +109,22 @@ def replace_french_from_to(value):
     x = re.sub(r'le (\w{3})', r'\1', x)
     return x
 
+def add_trailing_zeros(matchobj):
+    time_block = int(matchobj.group(0))
+    if time_block < 10:
+        time_block = '{0:>02}'.format(str(time_block))
+        return '{0:<04}'.format(str(time_block))
+    return '{0:<04}'.format(matchobj.group(0))
 
 def replace_hours_without_time_delimeter(value):
+    # if any(x not in value for x in ['am', 'pm', 'p', 'a']):
+    #     value = re.sub(r'(\d+)', add_trailing_zeros, value)
+
     return re.sub(r'(\d{1,2})(\d{2})', r'\1:\2', value)
 
 
 def replace_hour_groups(value):
-    p = r'\[(\(\d{2}:\d{2},\d{2}:\d{2}\))\]/\[(\(\d{2}:\d{2},\d{2}:\d{2}\))\]'
+    p =r'\[(\(\d{2}:\d{2},\d{2}:\d{2}\))\]/\[(\(\d{2}:\d{2},\d{2}:\d{2}\))\]'
     return re.sub(p, r'[\1,\2]', value)
 
 def without_am_pm(matchobj):
@@ -198,7 +206,8 @@ def replace_with_unstructured_hours(matchobj):
 
 def replace_open_close_delimeter(value):
     # pattern = r'(\d{2}:\d{2})[\D]*(\d{2}:\d{2})'
-    pattern = r'(\d{2}:\d{2}[:\d{2}]*)[\D]*(\d{2}:\d{2}[:\d{2}]*)'
+    # pattern = r'(\d{1,2}:\d{2}[:\d{2}]*)[\D]*(\d{1,2}:\d{2}[:\d{2}]*)'
+    pattern = r'(\d{2}:\d{2})[\D]*(\d{2}:\d{2})'
     # pattern = r'(\d{2}:\d{2})[\s-]*(\d{2}:\d{2})'
     return re.sub(pattern, replace_with_unstructured_hours, value)
 
@@ -432,7 +441,7 @@ def main_test():
     # #     brand_name = row[0]
     # #     print brand_name
     #from validated database
-    brand_name = 'ARBY S'
+    brand_name = 'Carrabba\'s Italian Grill'
     query = """
        SELECT * FROM O_O_DATA.scrapers_hoo
        WHERE brand_name LIKE \"%"""+ brand_name + """%\";
