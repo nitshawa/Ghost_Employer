@@ -68,6 +68,13 @@ replacements = {
 
 }
 
+replacement_7days = {'mon-sun : 00:00-00:00':[
+'24/7',
+'open 24 hours',
+'open 24 hours per day may vary',
+'open 24 hrs',
+'24 hours, 7 days a week',
+'24 hours open']}
 
 def remove_html_tags(value):
   tags = re.compile('<.*?>')
@@ -75,14 +82,14 @@ def remove_html_tags(value):
   return clean_value
 
 def replace_24_by_7(value):
-    replacement_7days = {'mon-sun : 00:00-00:00':['24/7', 'open 24 hours']}
     value = value.lower()
     for (key, values) in replacement_7days.iteritems():
         for rep in values:
-            try:
-                value = value.replace(rep, key)
-            except:
-                continue
+            if value.strip() == rep: # if days are not given
+                try:
+                    value = value.replace(rep, key)
+                except:
+                    continue
     return value
 
 
@@ -153,10 +160,10 @@ def replace_hours_for_match(matchobj):
     if len(str_min) > 0:
         int_min = int(str_min)
     ampm = obj.get('ampm', '').replace('.', '').replace(' ', '')
-    if ampm == 'pm':
+    if ampm in ['p', 'pm']  and  int_hour != 12: # 12pm -> 12
         int_hour = (int_hour + 12) % 24
 
-    if ampm == 'am' and int_hour == 12:  #12am -> 00
+    if ampm in ['a','am'] and int_hour == 12:  #12am -> 00
         int_hour = (int_hour + 12) % 24
 
     if int_hour > 23 :
@@ -425,7 +432,7 @@ def main_test():
     # #     brand_name = row[0]
     # #     print brand_name
     #from validated database
-    brand_name = 'H-E-B Foods'
+    brand_name = 'ARBY S'
     query = """
        SELECT * FROM O_O_DATA.scrapers_hoo
        WHERE brand_name LIKE \"%"""+ brand_name + """%\";
