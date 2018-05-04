@@ -433,10 +433,10 @@ def main_test():
     # #     brand_name = row[0]
     # #     print brand_name
     #from validated database
-    brand_name = 'selected-brands'
+    brand_name = 'selected-brands_rerun_NO_132'
     query = """
        SELECT brand_name, raw_business_hours
-       FROM O_O_DATA.scrapers_hoo where brand_name REGEXP 'Bonefish|Ford|H-E-B Foods|Sprint|Advance America|Noodles & Co|Best Buy|BP|Carrabba|Hannaford Pharmacy|TGI Friday|Ashley Furniture|At Home|Audi|Babies R Us|Banana Republic|Bob Evans Restaurant|Buffalo Wild Wings|Burger King|AAA|24 Hour Fitness|99 Cents Only Stores|Advance Auto Parts|ALDI|Anytime Fitness|Applebees|Arby|Panda Express' ;
+       FROM O_O_DATA.scrapers_hoo where brand_name in ("Bonefish Grill","Ford","Sprint","Advance America","Noodles & Co","Ashley","Audi","Babies R Us","Banana Republic","Bob Evans","Buffalo Wild Wings","Burger King","H-E-B FOODS","Home depot","Longhorn Steakhouse","PAYLESS","Publix","REI","Target","Tracfone wireless","Tropical Smoothie Cafe","White Castle","AAA","Burlington","GNC","IKEA","Best Buy","BP","Carrabba's Italian Grill","Hannaford Pharmacy","TGI Fridays","ADVANCE AUTO PARTS","ALDI","Anytime Fitness","AT&T Cellular","Bank Of America","Bass Pro Shops","Bed Bath & Beyond","Belk","Big Lots","Bj srestaurants","BJ's Wholesale Club","Bojangles Famous Chicken","Boston Market","BuyBuy Baby","Cabela's","Carls jr","Carmax","Cheddar's Scratch Kitchen","Chili s","Chipotle","Chuck E Cheeses","Cost Plus World Market","Cracker Barrel","Culvers","Dennys","Dillard's","Dillons","DiscountTire","Dodge","Dollar General","Dollar Tree","Dressbarn","Dunkin Donuts","Einstein Bros Bagels","Family Dollar","Famous Footwear","Five Below","GAP","GMC","Hardees","Holiday Stationstores","Infiniti","Jack In The Box","JCPenney","JEEP","Jiffy Lube","Jo-Ann Fabric and Craft Stores","KFC","Kohl's","Lifetime Fitness","Lincoln","Little Caesars","Macys","Marshalls","Massage Envy","Mcdonalds","Men's Wearhouse","Menards","Michaels","Nike","Nissan","Nordstrom","Nordstrom Rack","O'Reilly Auto Parts","Ocharleys","Office Depot","OLD NAVY","Olive Garden Italian Restaurant","Outback Steakhouse","P F Changs China Bistro","Panda Express","Panera Bread","Party City","Pep Boys","Perkins Restaurant & Bakery","Petsmart","Piggly Wiggly","Popeyes","Ross dress for less","Ruby Tuesday","Sheetz","Sleepy's","SONIC DRIVE-IN","Sprouts Farmers Market","Staples","Starbucks","T-Mobile","Taco Bell","Texas Roadhouse","Tim Hortons","TJ MAXX","TOYS R US","Tractor Supply Co.","Ulta Beauty","Volvo","Waffle House","WAWA Food Market","Wendy's","WinCo Foods","Wingstop");
        """
 
     # # and raw_business_hours like "%24:00-18:00%" limit 2
@@ -565,7 +565,7 @@ def main_test():
         #  phone_number, primary_sic, secondary_sic, latitude, longitude, raw_business_hours, debug_formated_business_hours, formated_business_hours, brand_id, raw_address, updated_date, url])
         # break
 def accuracy_csv():
-        accuracy_csv = csv.reader(open("selected-brands"+ ' store_hours.csv', 'rb'))
+        accuracy_csv = csv.reader(open("selected-brands_rerun_NO_132 store_hours.csv", 'rb'))
         accuracy_csv = filter(None,[x for x in accuracy_csv][1:])
 
         total  = len([x for x in accuracy_csv])
@@ -581,7 +581,7 @@ def accuracy_csv():
 
         print ' # of faulty brands - {}'.format(faulty_brands)
         print 'name of faulty brans - {}',format(set([x[0] for x in accuracy_csv if  'Unhandled' in x[2]  or 'invalid' in x[2] ]))
-        unhandled_csv = csv.writer(open('updated_bad_unhandled_store_hours.csv', 'wb'))
+        unhandled_csv = csv.writer(open('updated_bad_unhandled_store_hours_rerun_NO_132.csv', 'wb'))
         unhandled_csv.writerow(['brand_name','input_string', 'output_dict', "unmatched"])
 
         for row in accuracy_csv:
