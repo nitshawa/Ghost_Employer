@@ -155,8 +155,12 @@ def without_am_pm(matchobj):
     if end_min > 59:
         end_min = 00
 
+    open_close_hours_difference = end_hour - start_hour
+    print 'difference of end-start', open_close_hours_difference
     if  start_hour != 0 and end_hour != 0:
-        if end_hour - start_hour <= 3  :
+        """excluding -ve diff Mo:05:30-02:00,
+        and update if difference is <3 hours"""
+        if open_close_hours_difference <= 3 and open_close_hours_difference >= 0 :
             end_hour = (end_hour + 12) % 24
 
 
@@ -726,8 +730,8 @@ if __name__ == "__main__":
     #    SELECT brand_name FROM O_O_DATA.scrapers_hoo
     #    group by brand_name;
     #    """
-    brand_name = "Petco"
-    sheet_link = 'https://docs.google.com/spreadsheets/d/1oYGE0TtgAXE-q-gqoPOjzwbNrxzY0nT-t4JouUBmQu8/edit#gid=1220485708'
+    brand_name = "Taco John's"
+    sheet_link = 'https://docs.google.com/spreadsheets/d/10m8aD2IMqbXxpmaIRHVGnOBly_EgT0wcis-ZuKtVII4/edit?ts=59393933#gid=1698828206'
 
     update_gsheet(brand_name, sheet_link)
     # main_test()
