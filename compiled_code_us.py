@@ -59,7 +59,7 @@ replacements = {
     # ' to ': [' a '],
     'mon-sun ' : ['daily','every day', 'everyday', 'all week', '7 days a week', 'seven days a week', '7 days', 'per day', '7days'],
     '[]': ['closed - closed', 'closed-closed', 'closed:closed', 'close - close', 'close-close', 'closed', 'close'],
-    'mon-fri ': ['weekday_hours', 'weekday', 'weekdays', 'mo-fr',  'mon-f ', 'm-f '], #for simmons bank only one m-f
+    'mon-fri ': ['weekday_hours', 'weekday', 'weekdays', 'mo-fr',  'mon-f ', 'm-f '], #for simmons_bank only one m-f
     ' ': ['_hours', 'hrs', 'black', ' (est)', 'open', '-none'],
     # ', ': ['/'],
     '&': ['\u0026', 'and'],
