@@ -59,7 +59,7 @@ replacements = {
     # ' to ': [' a '],
     'mon-sun ' : ['daily','every day', 'everyday', 'all week', '7 days a week', 'seven days a week', '7 days', 'per day', '7days'],
     '[]': ['closed - closed', 'closed-closed', 'closed:closed', 'close - close', 'close-close', 'closed', 'close'],
-    'mon-fri ': ['weekday_hours', 'weekday', 'weekdays', 'mo-fr',  'mon-f ', 'm-f '], #for simmons_bank only one m-f
+    'mon-fri ': ['weekday_hours', 'weekday', 'weekdays', 'mo-fr',  'mon-f ', 'm-f '], #for simmons bank only one m-f
     ' ': ['_hours', 'hrs', 'black', ' (est)', 'open', '-none'],
     # ', ': ['/'],
     '&': ['\u0026', 'and'],
@@ -156,7 +156,7 @@ def without_am_pm(matchobj):
         end_min = 00
 
     open_close_hours_difference = end_hour - start_hour
-    print 'difference of end-start', open_close_hours_difference
+    # print 'difference of end-start', open_close_hours_difference
     if  start_hour != 0 and end_hour != 0:
         """excluding -ve diff Mo:05:30-02:00,
         and update if difference is <3 hours"""
@@ -730,8 +730,8 @@ if __name__ == "__main__":
     #    SELECT brand_name FROM O_O_DATA.scrapers_hoo
     #    group by brand_name;
     #    """
-    brand_name = "Taco John's"
-    sheet_link = 'https://docs.google.com/spreadsheets/d/10m8aD2IMqbXxpmaIRHVGnOBly_EgT0wcis-ZuKtVII4/edit?ts=59393933#gid=1698828206'
+    brand_name = "Ulta Beauty"
+    sheet_link = 'https://docs.google.com/spreadsheets/d/1NCrwgIKN4xuH6I7kduK51WCp_mXI4PB_-EVtHKL3Wak/edit?ts=59031b1c#gid=1730786319'
 
     update_gsheet(brand_name, sheet_link)
     # main_test()
