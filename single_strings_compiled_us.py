@@ -34,7 +34,7 @@ replacements = {
     'wed': ['wednesday', 'mittwoch', 'mercredi', 'mircoles', 'wed-wed', 'wen','we ','we:'],
     'wed-':['we-'],
 
-    'thu': ['thursday', 'donnerstag', 'jeudi', 'jueves', 'thurs', 'thur','thr', 'thu-thu', 'th ', 'th:', 'th'],
+    'thu': ['thursday', 'donnerstag', 'jeudi', 'jueves', 'thurs', 'thur','thr', 'thu-thu', 'th ', 'th:'],#, 'th'],
     'thu-':['th-'],
 
     'fri': ['friday', 'freitag', 'vendredi', 'viernes', 'fir','fri-fri',  'fr ', 'fr-',  'fr:'],
@@ -59,19 +59,22 @@ replacements = {
     # ', ': ['/'],
     '&': ['\u0026', 'and'],
     # 'mon-sun : 00:00-00:00':['24/7', 'open 24 hours'],
-    '00:00-00:00': ['24 hours','24:00rs', '24:00urs', '24:00urs', '24:00s', '24 hrs'],
+    '00:00-00:00': ['24 hours','24:00rs', '24:00urs', '24:00urs', '24:00s','all day', 'all:day','24 hrs'],
      '-': [' through ', ' to ', ' thuough ', '\xe2\x80\x93'],
        # '00:00': ['24:00'],
        # '00:30': ['24:30'],
-       '-23:59': ['-midnight', ' - midnight'],
-       # '23:59-': ['midnight-']
+       ' 00:00 ': ['midnight'],#, ' - midnight'],
+       #'00:00': ['midnight - ', 'midnight-']
 
 }
 
 
 replacement_7days = {'mon-sun : 00:00-00:00':[
 '24/7',
+'all day',
+'all:day',
 'open 24 hours',
+'24 Hours Open',
 'open 24 hours per day may vary',
 'open 24 hrs',
 '24 hours, 7 days a week',
@@ -86,7 +89,7 @@ def replace_24_by_7(value):
     value = value.lower()
     for (key, values) in replacement_7days.iteritems():
         for rep in values:
-            if value.strip() == rep: # if days are not given
+            if value.strip() == rep: # if day name are not given
                 try:
                     value = value.replace(rep, key)
                 except:
@@ -101,7 +104,6 @@ def replace_keywords(value):
     before_replacement = value.lower()
     for (key, values) in replacements.iteritems():
         for rep in values:
-            # print rep, value
             try:
                 value = value.replace(rep, key)
                 # if before_replacement != value:
@@ -156,9 +158,10 @@ def without_am_pm(matchobj):
 
     if end_min > 59:
         end_min = 00
-
+    open_close_hours_difference = end_hour - start_hour
+    print 'difference of end-start', open_close_hours_difference
     if  start_hour != 0 and end_hour != 0:
-        if end_hour - start_hour <= 3  :
+        if open_close_hours_difference <= 3 and open_close_hours_difference >= 0 :
             end_hour = (end_hour + 12) % 24
 
 
@@ -429,16 +432,18 @@ def formated_output_dict(value):
                 combined_days['end_time'] = '{}'.format(end_time)
 
             combined_days['days'] = val
+            combined_days_sorted = combined_days['days'].sort(key=lambda x: day_list.index(x))
+
             final_output.append(combined_days)
 
     if len(final_output) == 0:
-        return ''
+        return []
     return final_output
 
 
 def main_test():
-    # values = ["Monday:Open 24 hours,Tuesday:Open 24 hours,Wednesday:Open 24 hours,Thursday:Open 24 hours,Friday:Open 24 hours,Saturday:Open 24 hours,Sunday:Open 24 hours"]
-    values = ["Monday:10:00:00-21:00:00,Tuesday:10:00:00-21:00:00,Wednesday:10:00:00-21:00:00,Thursday:10:00:00-21:00:00,Friday:10:00:00-21:00:00,Saturday:10:00:00-21:00:00,Sunday:11:00:00-18:00:00"]
+    values = ["Mo:05:30-02:00,Tu:05:30-02:00,We:05:30-02:00,Th:05:30-02:00,Fr:05:30-02:00,Sa:05:30-02:00,Su:05:30-02:00"]
+    # values = ["Monday:10:00:00-21:00:00,Tuesday:10:00:00-21:00:00,Wednesday:10:00:00-21:00:00,Thursday:10:00:00-21:00:00,Friday:10:00:00-21:00:00,Saturday:10:00:00-21:00:00,Sunday:11:00:00-18:00:00","Monday:Open 24 hours,Tuesday:Open 24 hours,Wednesday:Open 24 hours,Thursday:Open 24 hours,Friday:Open 24 hours,Saturday:Open 24 hours,Sunday:Open 24 hours", "Monday11:00 AM-10:00 PM,Tuesday-11:00 AM:10:00 PM,Wednesday-11:00 AM:10:00 PM,Thursday-11:00 AM:10:00 PM,Friday-11:00 AM:11:00 PM,Saturday-11:00 AM:11:00 PM,Sunday-11:00 AM:9:00 PM"]
     for value in values:
         if value is None:
             continue
