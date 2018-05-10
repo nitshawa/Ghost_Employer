@@ -9,6 +9,12 @@ import json
 import ast
 import datetime
 from dateutil import parser
+import pygsheets
+import MySQLdb
+import sys
+#from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
 reload(sys)
 sys.setdefaultencoding("utf-8")
 cnx = mysql.connector.connect(
@@ -62,7 +68,7 @@ replacements = {
      '-': [' through ', ' to ', ' thuough ', '\xe2\x80\x93'],
        # '00:00': ['24:00'],
        # '00:30': ['24:30'],
-       '-23:59': ['-midnight', ' - midnight'],
+       ' 00:00 ': ['midnight'],
        # '23:59-': ['midnight-']
 
 }
@@ -70,6 +76,9 @@ replacements = {
 replacement_7days = {'mon-sun : 00:00-00:00':[
 '24/7',
 'open 24 hours',
+'24 Hours Open',
+'all day',
+'all:day',
 'open 24 hours per day may vary',
 'open 24 hrs',
 '24 hours, 7 days a week',
@@ -206,8 +215,8 @@ def replace_with_unstructured_hours(matchobj):
 
 def replace_open_close_delimeter(value):
     # pattern = r'(\d{2}:\d{2})[\D]*(\d{2}:\d{2})'
-    # pattern = r'(\d{1,2}:\d{2}[:\d{2}]*)[\D]*(\d{1,2}:\d{2}[:\d{2}]*)'
-    pattern = r'(\d{2}:\d{2})[\D]*(\d{2}:\d{2})'
+    pattern = r'(\d{1,2}:\d{2}[:\d{2}]*)[\D]*(\d{1,2}:\d{2}[:\d{2}]*)' # for seconds Qdoba
+    # pattern = r'(\d{2}:\d{2})[\D]*(\d{2}:\d{2})'
     # pattern = r'(\d{2}:\d{2})[\s-]*(\d{2}:\d{2})'
     return re.sub(pattern, replace_with_unstructured_hours, value)
 
@@ -355,6 +364,7 @@ def date_to_week_day(value):
 
         return datetime.datetime.strptime(formated_date, '%Y-%m-%d').strftime('%A')
     except:
+        raise
         return 'invalid date format!:{}'.format(value)
 # print date_to_week_day(string)
 # date = 'January 11, 2010'
@@ -425,10 +435,131 @@ def formated_output_dict(value):
                 combined_days['end_time'] = '{}'.format(end_time)
             combined_days['days'] = val
             final_output.append(combined_days)
+            combined_days_sorted = combined_days['days'].sort(key=lambda x: day_list.index(x))
+
 
     if len(final_output) == 0:
-        return ''
+        return []
     return final_output
+
+def update_gsheet(brand_name, sheet_link):
+    sheet_key = re.findall(r'\/d\/(.*?)\/edit', sheet_link)[0]
+    gc = pygsheets.authorize()
+
+    sht1 = gc.open_by_key(sheet_key)
+    wks1 = sht1.worksheet_by_title("validated")
+    wks1.export(pygsheets.ExportType.CSV, brand_name + '.csv')
+
+    output_csv = csv.writer(open( "/media/nitin/809E47539E4740C0/HD/TestCodes/hours_of_operation/testing/compiled_code_us/shared_brands/done_" +brand_name + '.csv', 'wb'))
+    output_csv.writerow(["brand_name", "store_name", "type", "address_1",
+        "city", "state", "zipcode", "country_code", "phone_number",
+         "primary_sic", "secondary_sic", "latitude", "longitude",
+         "raw_business_hours", "debug_formated_business_hours","converted_business_hours", "brand_id", "raw_address", "updated_date", "url"])
+
+    input_csv = csv.reader(open(brand_name + '.csv', 'rb'))
+    cursor_list = [x for x in input_csv][1:]
+    for value in cursor_list:
+
+        brand_name = value[0]
+        store_name = value[1]
+        store_type = value[2]
+        address_1 = value[3]
+        city = value[4]
+        state = value[5]
+        zipcode = value[6]
+        country_code = value[7]
+        phone_number = value[8]
+        primary_sic = value[9]
+        secondary_sic = value[10]
+        latitude = value[11]
+        longitude = value[12]
+        raw_business_hours = value[13]
+        print
+        print 'raw_business_hours', raw_business_hours
+        print '.+'*100
+        brand_id = value[14]
+        raw_address = value[15]
+        updated_date = value[16]
+        url = value[17]
+
+        value = raw_business_hours
+        if value is None:
+            continue
+        # value = value[13]  # Access tuple from dataset
+        # value = value  # from cursor list
+        # print value
+        if not isinstance(value, str) and not isinstance(value, unicode):
+            continue
+
+        value = value.replace("\n", " ").replace("\\n", " ").strip().lower()
+
+        # if value is "":
+        #     continue
+
+        validated_check = validate_input_string(value)
+
+        if validated_check is isinstance(validated_check, bool):
+            try:
+                y = check_string_for_date(value)
+                print 'befor replace_keywords', y
+                y = replace_keywords(y)
+                print 'after replace_keywords', y
+                # y = replace_french_from_to(y)
+                if 'today' in y:
+                    y = replace_relative_days(y)
+
+                y = replace_hours_without_time_delimeter(y)
+                # print y, 'replace_hours_without_time_delimeter'
+                y = convert_to_24h(y)
+                # print y, 'convert_to_24h'
+
+                y = replace_open_close_delimeter(y)
+                # print y, 'replace_open_close_delimeter'
+                y = replace_hour_groups(y)
+                # print y, 'replace_hour_groups'
+                not_matched = replace_hour_groups(y)
+                y = string_to_dict(y)
+
+                if isinstance(y, dict):
+                    try:
+                        print 'before day expantion : ', y
+
+                        y = day_expand(y)
+                        # y = sorted_output(y)
+                        print 'after day expantion : ', y
+                        debug_y = debug_formated_output_dict(y)
+                        print 'after debug_formated_output_dict : ', debug_y
+                        y = formated_output_dict(y)
+                        print 'after formated_output_dict : ', y
+
+                    except:
+                        raise
+                        y = 'Unhandled Day expantion Failed : {0}'.format(y)
+                else:
+                        y = 'Unhandled Unable to convert in dict : {0}'.format(y)
+            except Exception as e:
+                raise
+                # print e, value
+                y = 'Unhandled formats : {0}'.format(value)
+                pass
+        else:
+            print 'in else ...................', validated_check
+            y = validated_check
+            debug_y = y
+            not_matched = replace_hour_groups(y)
+
+        # print y
+
+        formated_business_hours = y
+        debug_formated_business_hours = debug_y
+        if value == '':
+
+            formated_business_hours = ''
+        # break
+
+        # output_csv.writerow([' '.join(value.split()).encode('ascii', 'ignore'), y, ' '.join(not_matched.split())])
+        output_csv.writerow([brand_name, store_name, store_type, address_1, city, state, zipcode, country_code, phone_number, primary_sic, secondary_sic, latitude, longitude, raw_business_hours, debug_formated_business_hours, formated_business_hours, brand_id, raw_address, updated_date, url])
+
 
 
 def main_test():
@@ -441,7 +572,7 @@ def main_test():
     # #     brand_name = row[0]
     # #     print brand_name
     #from validated database
-    brand_name = 'Carrabba\'s Italian Grill'
+    brand_name = 'Walmart'
     query = """
        SELECT * FROM O_O_DATA.scrapers_hoo
        WHERE brand_name LIKE \"%"""+ brand_name + """%\";
@@ -460,7 +591,7 @@ def main_test():
          "raw_business_hours", "debug_formated_business_hours","converted_business_hours", "brand_id", "raw_address", "updated_date", "url"])
 
     # from convert sheets
-    # input_csv = csv.reader(open('/media/nitin/809E47539E4740C0/HD/TestCodes/hours_of_operation/testing/compiled_code_us/5_brands/Sample_4_brands.csv', 'rb'))
+    # input_csv = csv.reader(open('/home/nitin/Downloads/Acura_US - Validated 2017-11.csv', 'rb'))
     # cursor_list = [
     # 'today: 6:00 am - 11:00 pm/ 6:00 am - 11:00 pm, tomorrow: 6:00 am - 11:00 pm thursday: 6:00 am - 11:00 pm friday: 6:00 am - 11:00 pm saturday: 6:00 am - 11:00 pm sunday: 6:00 am - 11:00 pm monday: 6:00 am - 11:00 pm']
     # # 'mon-06:00:24:00 tue-06:00:24:00 wed-06:00:24:00 thr-06:00:24:00 fri-06:00:24:00 sat-06:00:24:00 sun-06:00:24:00']
@@ -595,7 +726,11 @@ if __name__ == "__main__":
     #    SELECT brand_name FROM O_O_DATA.scrapers_hoo
     #    group by brand_name;
     #    """
-    main_test()
+    brand_name = "Petco"
+    sheet_link = 'https://docs.google.com/spreadsheets/d/1oYGE0TtgAXE-q-gqoPOjzwbNrxzY0nT-t4JouUBmQu8/edit#gid=1220485708'
+
+    update_gsheet(brand_name, sheet_link)
+    # main_test()
     # accuracy_csv()
 
     # query =
