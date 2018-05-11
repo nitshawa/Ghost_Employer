@@ -24,7 +24,7 @@ cursor = cnx.cursor()
 
 day_list = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 days_hours = {}
-stop_words = ['store','pharmacy','operation','investments','mortgage','trust','sales','of','the','for','more','holiday','christmas','parts','service','gym','kids','club','new','year\'s day','staffed','teller','lobby','drive','thru','branch','dining','room','stores','bank','lobby','served ','dine in','dine','vehicle','certified ','produce','deli','bakery','seafood','carryout','delivery','finance','car','parts','used', '!', 'currently']
+stop_words = ['temporarily','coming', 'soon','store','pharmacy','operation','investments','mortgage','trust','sales','of','the','for','more','holiday','christmas','parts','service','gym','kids','club','new','year\'s day','staffed','teller','lobby','drive','thru','branch','dining','room','stores','bank','lobby','served ','dine in','dine','vehicle','certified ','produce','deli','bakery','seafood','carryout','delivery','finance','car','parts','used', '!', 'currently']
 # todo, make into ordered dict to ensure the waterfall is adhered to
 replacements = {
     'mon': ['monday', 'montag', 'lundi', 'lunes', 'mon-mon', 'mo ', 'mo:'],
@@ -71,6 +71,7 @@ replacements = {
 
 replacement_7days = {'mon-sun : 00:00-00:00':[
 '24/7',
+'open 24/7',
 'all day',
 'all:day',
 'open 24 hours',
@@ -252,7 +253,9 @@ def string_to_dict(value):
     pattern = "(\[.*?\])"
     hours = re.findall(pattern, value)
     indexer = 0
+    print 'value.find("[")', value.find("[")
     if value.find("[") == 0:
+      print 'after string to dict > ', value
       return time_day_dict(value)
 
 
@@ -266,6 +269,7 @@ def string_to_dict(value):
         days = ' '.join(raw_days.replace(',', '').replace('.', '').replace(':','').split()).strip('-').strip()
         days_hours[days] = hour
         indexer = end
+    print 'after string to dict > ', days_hours
     return days_hours
 
 
@@ -443,8 +447,8 @@ def formated_output_dict(value):
 
 
 def main_test():
-    values = ["Sat. 9:30-6:00pm"]
-    # values = ["Monday:10:00:00-21:00:00,Tuesday:10:00:00-21:00:00,Wednesday:10:00:00-21:00:00,Thursday:10:00:00-21:00:00,Friday:10:00:00-21:00:00,Saturday:10:00:00-21:00:00,Sunday:11:00:00-18:00:00","Monday:Open 24 hours,Tuesday:Open 24 hours,Wednesday:Open 24 hours,Thursday:Open 24 hours,Friday:Open 24 hours,Saturday:Open 24 hours,Sunday:Open 24 hours", "Monday11:00 AM-10:00 PM,Tuesday-11:00 AM:10:00 PM,Wednesday-11:00 AM:10:00 PM,Thursday-11:00 AM:10:00 PM,Friday-11:00 AM:11:00 PM,Saturday-11:00 AM:11:00 PM,Sunday-11:00 AM:9:00 PM"]
+    values = ["Open 24/7"]
+    # values = ["Monday-10:00:00-21:00:00,Tuesday:10:00:00-21:00:00,Wednesday:10:00:00-21:00:00,Thursday:10:00:00-21:00:00,Friday:10:00:00-21:00:00,Saturday:10:00:00-21:00:00,Sunday:11:00:00-18:00:00","Monday:Open 24 hours,Tuesday:Open 24 hours,Wednesday:Open 24 hours,Thursday:Open 24 hours,Friday:Open 24 hours,Saturday:Open 24 hours,Sunday:Open 24 hours", "Monday11:00 AM-10:00 PM,Tuesday-11:00 AM:10:00 PM,Wednesday-11:00 AM:10:00 PM,Thursday-11:00 AM:10:00 PM,Friday-11:00 AM:11:00 PM,Saturday-11:00 AM:11:00 PM,Sunday-11:00 AM:9:00 PM"]
     for value in values:
         if value is None:
             continue
