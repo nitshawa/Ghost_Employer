@@ -164,8 +164,8 @@ def without_am_pm(matchobj):
             end_hour = (end_hour + 12) % 24
 
 
-
     return  " {0:02d}:{1:02d}-{2:02d}:{3:02d}".format(start_hour,start_min, end_hour, end_min)
+    # return  "{0:02d}:{1:02d}-{2:02d}:{3:02d}".format(start_hour,start_min, end_hour, end_min)
 
 
 def replace_hours_for_match(matchobj):
@@ -248,11 +248,17 @@ def string_to_dict(value):
         mon: [(08:45,19:30)], tue: [(08:45,19:30)], wed: [(08:45,19:30)], thu: [(08:45,19:30)], fri: [(08:45,20:00)], sat: [(08:45,19:30)]
         mon. & thu. [(10:00,20:00)],tue., wed., fri. [(10:00,17:30)],sat. [(10:00,17:30)],sun. [(24:00,17:00)]
     """
+    print 'entering string to dict ', value
+
     days_hours = {}
     pattern = "(\[.*?\])"
     hours = re.findall(pattern, value)
     indexer = 0
-    if value.find("[") == 0:
+    print 'value.find("[")', value.find("[")
+    # below condition to trigger if traling spaces comes from 24 hours conversion
+    if value.find("[") < 2:
+      print 'after string to dict > ', value
+
       return time_day_dict(value)
 
 
@@ -264,6 +270,7 @@ def string_to_dict(value):
         days = ' '.join(raw_days.replace(',', '').replace('.', '').replace(':','').split()).strip('-').strip()
         days_hours[days] = hour
         indexer = end
+    print 'after string to dict > ', days_hours
     return days_hours
 
 
@@ -730,8 +737,8 @@ if __name__ == "__main__":
     #    SELECT brand_name FROM O_O_DATA.scrapers_hoo
     #    group by brand_name;
     #    """
-    brand_name = "Costco"
-    sheet_link = 'https://docs.google.com/spreadsheets/d/1sjbxwW_yyq7PgDBSKIh188LQKEf3QNNOV5rT-6l7KdY/edit#gid=1349174563'
+    brand_name = "BJ's Restaurant & Brewhouse"
+    sheet_link = 'https://docs.google.com/spreadsheets/d/1DcpsC3CCUxxrXkjcPo6OI7S7CXmdqfANcVbsWqlxK9U/edit?ts=58e23928#gid=51621164'
 
     update_gsheet(brand_name, sheet_link)
     # main_test()
