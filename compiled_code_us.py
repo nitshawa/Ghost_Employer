@@ -30,7 +30,7 @@ cursor = cnx.cursor()
 
 day_list = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 days_hours = {}
-stop_words = ['store','pharmacy','operation','investments','mortgage','trust','sales','of','the','for','more','holiday','christmas','parts','service','gym','kids','club','new','year\'s day','staffed','teller','lobby','drive','thru','branch','dining','room','stores','bank','lobby','served ','dine in','dine','vehicle','certified ','produce','deli','bakery','seafood','carryout','delivery','finance','car','parts','used', '!', 'currently', 'temporarily', 'reopening']
+stop_words = ['temporarily','coming', 'soon','store','pharmacy','operation','investments','mortgage','trust','sales','of','the','for','more','holiday','christmas','parts','service','gym','kids','club','new','year\'s day','staffed','teller','lobby','drive','thru','branch','dining','room','stores','bank','lobby','served ','dine in','dine','vehicle','certified ','produce','deli','bakery','seafood','carryout','delivery','finance','car','parts','used', '!', 'currently', 'temporarily', 'reopening']
 # todo, make into ordered dict to ensure the waterfall is adhered to
 replacements = {
     'mon': ['monday', 'montag', 'lundi', 'lunes', 'mon-mon', 'mo ', 'mo:'],
@@ -75,6 +75,7 @@ replacements = {
 
 replacement_7days = {'mon-sun : 00:00-00:00':[
 '24/7',
+'open 24/7',
 'open 24 hours',
 '24 Hours Open',
 'all day',
@@ -737,8 +738,8 @@ if __name__ == "__main__":
     #    SELECT brand_name FROM O_O_DATA.scrapers_hoo
     #    group by brand_name;
     #    """
-    brand_name = "BJ's Restaurant & Brewhouse"
-    sheet_link = 'https://docs.google.com/spreadsheets/d/1DcpsC3CCUxxrXkjcPo6OI7S7CXmdqfANcVbsWqlxK9U/edit?ts=58e23928#gid=51621164'
+    brand_name = "Infiniti"
+    sheet_link = 'https://docs.google.com/spreadsheets/d/1HLWcs7MyAwqqOb0I1RMXjxJtI9uXothhOXQLWmp9rN0/edit?ts=58ff46f7#gid=344365284'
 
     update_gsheet(brand_name, sheet_link)
     # main_test()
