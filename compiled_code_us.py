@@ -164,8 +164,8 @@ def without_am_pm(matchobj):
         if open_close_hours_difference <= 3 and open_close_hours_difference >= 0 :
             end_hour = (end_hour + 12) % 24
 
-
-    return  " {0:02d}:{1:02d}-{2:02d}:{3:02d}".format(start_hour,start_min, end_hour, end_min)
+    #removed space as its converted wrong when secs available on hoo
+    return  "{0:02d}:{1:02d}-{2:02d}:{3:02d}".format(start_hour,start_min, end_hour, end_min)
     # return  "{0:02d}:{1:02d}-{2:02d}:{3:02d}".format(start_hour,start_min, end_hour, end_min)
 
 
@@ -738,8 +738,8 @@ if __name__ == "__main__":
     #    SELECT brand_name FROM O_O_DATA.scrapers_hoo
     #    group by brand_name;
     #    """
-    brand_name = "Infiniti"
-    sheet_link = 'https://docs.google.com/spreadsheets/d/1HLWcs7MyAwqqOb0I1RMXjxJtI9uXothhOXQLWmp9rN0/edit?ts=58ff46f7#gid=344365284'
+    brand_name = "Carmax"
+    sheet_link = 'https://docs.google.com/spreadsheets/d/1CztXSpt_8nSTdZ_kbWV9XapF5YQeEOnYNvCZ1rH0yBw/edit?ts=58edcd77#gid=1232857383'
 
     update_gsheet(brand_name, sheet_link)
     # main_test()
