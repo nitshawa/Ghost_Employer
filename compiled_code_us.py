@@ -161,7 +161,7 @@ def without_am_pm(matchobj):
     if  start_hour != 0 and end_hour != 0:
         """excluding -ve diff Mo:05:30-02:00,
         and update if difference is <3 hours"""
-        if open_close_hours_difference <= 3 and open_close_hours_difference >= 0 :
+        if open_close_hours_difference < 3 and open_close_hours_difference >= 0 :
             end_hour = (end_hour + 12) % 24
 
     #removed space as its converted wrong when secs available on hoo
@@ -740,8 +740,8 @@ if __name__ == "__main__":
     #    SELECT brand_name FROM O_O_DATA.scrapers_hoo
     #    group by brand_name;
     #    """
-    brand_name = "Quick lane"
-    sheet_link = 'https://docs.google.com/spreadsheets/d/1o3T_Q0AOdme6gug9GL_yB4xpojPBTpaE7YiObg-xAXc/edit#gid=951347341'
+    brand_name = "Einstein Bros Bagels"
+    sheet_link = 'https://docs.google.com/spreadsheets/d/1PBnV5LYaxNbF5QxELtAfzmempp-fqOl2TlGPJlSm1gY/edit?ts=58f0c123#gid=1147798958'
 
     update_gsheet(brand_name, sheet_link)
     # main_test()
