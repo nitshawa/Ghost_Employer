@@ -54,7 +54,7 @@ replacements = {
     # ' to ': [' a '],
     'mon-sun' : ['daily','every day', 'everyday', 'all week', '7 days a week', 'seven days a week', '7 days', 'per day', '7days'],
     '[]': ['closed - closed', 'closed-closed', 'close - close', 'close-close', 'closed', 'close'],
-    'mon-fri': ['weekday_hours', 'weekday', 'weekdays', 'm-f', 'mo-fr',  'mon-f', 'm-f'], #for simmons bank only one m-f
+    'mon-fri': ['weekday_hours', 'weekday', 'weekdays', 'm-f', 'mo-fr',  'mon-f ', 'm-f '], #for simmons bank only one m-f
     ' ': ['_hours', 'hrs', 'black', ' (est)', 'open', '_'],
     # ', ': ['/'],
     '&': ['\u0026', 'and'],
@@ -427,6 +427,8 @@ def formated_output_dict(value):
             combined_days = {}
             start_time = re.search(r'\((\d{2}:\d{2}[:\d{2}]*)\,', time_block).group(1)
             end_time = re.search(r',(\d{2}:\d{2}[:\d{2}]*)\)', time_block).group(1)
+            start_time = start_time.strip(' :')
+            end_time = end_time.strip(' :')
             if len(start_time) == 5:
                 combined_days['start_time'] ='{}:00'.format(start_time)
             else:
@@ -447,7 +449,7 @@ def formated_output_dict(value):
 
 
 def main_test():
-    values = ["Open 24/7"]
+    values = ["7:00am - 6:00pm   / Mon-Fri, 8:00am - 3:00pm  /Sat"]
     # values = ["Monday-10:00:00-21:00:00,Tuesday:10:00:00-21:00:00,Wednesday:10:00:00-21:00:00,Thursday:10:00:00-21:00:00,Friday:10:00:00-21:00:00,Saturday:10:00:00-21:00:00,Sunday:11:00:00-18:00:00","Monday:Open 24 hours,Tuesday:Open 24 hours,Wednesday:Open 24 hours,Thursday:Open 24 hours,Friday:Open 24 hours,Saturday:Open 24 hours,Sunday:Open 24 hours", "Monday11:00 AM-10:00 PM,Tuesday-11:00 AM:10:00 PM,Wednesday-11:00 AM:10:00 PM,Thursday-11:00 AM:10:00 PM,Friday-11:00 AM:11:00 PM,Saturday-11:00 AM:11:00 PM,Sunday-11:00 AM:9:00 PM"]
     for value in values:
         if value is None:
