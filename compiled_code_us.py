@@ -60,7 +60,7 @@ replacements = {
     'mon-sun ' : ['daily','every day', 'everyday', 'all week', '7 days a week', 'seven days a week', '7 days', 'per day', '7days'],
     '[]': ['closed - closed', 'closed-closed', 'closed:closed', 'close - close', 'close-close', 'closed', 'close'],
     'mon-fri ': ['weekday_hours', 'weekday', 'weekdays', 'mo-fr',  'mon-f ', 'm-f '], #for simmons bank only one m-f
-    ' ': ['_hours', 'hrs', 'black', ' (est)', 'open', '-none'],
+    ' ': ['_hours', 'hrs', 'black', ' (est)', 'open', '-none', '_'],
     # ', ': ['/'],
     '&': ['\u0026', 'and'],
     'mon-sun : 00:00-00:00':['24/7', 'open 24 hours'],
@@ -166,7 +166,7 @@ def without_am_pm(matchobj):
 
     #removed space as its converted wrong when secs available on hoo
     return  "{0:02d}:{1:02d}-{2:02d}:{3:02d}".format(start_hour,start_min, end_hour, end_min)
-    # return  "{0:02d}:{1:02d}-{2:02d}:{3:02d}".format(start_hour,start_min, end_hour, end_min)
+    # return  " {0:02d}:{1:02d}-{2:02d}:{3:02d}".format(start_hour,start_min, end_hour, end_min)
 
 
 def replace_hours_for_match(matchobj):
@@ -437,6 +437,8 @@ def formated_output_dict(value):
             # combined_days['days'] = val
             start_time = re.search(r'\((\d{2}:\d{2}[:\d{2}]*)\,', time_block).group(1)
             end_time = re.search(r',(\d{2}:\d{2}[:\d{2}]*)\)', time_block).group(1)
+            start_time = start_time.strip(' :')
+            end_time = end_time.strip(' :')
             if len(start_time) == 5: #if seconds are not available
                 combined_days['start_time'] ='{}:00'.format(start_time)
             else:
@@ -738,8 +740,8 @@ if __name__ == "__main__":
     #    SELECT brand_name FROM O_O_DATA.scrapers_hoo
     #    group by brand_name;
     #    """
-    brand_name = "Carmax"
-    sheet_link = 'https://docs.google.com/spreadsheets/d/1CztXSpt_8nSTdZ_kbWV9XapF5YQeEOnYNvCZ1rH0yBw/edit?ts=58edcd77#gid=1232857383'
+    brand_name = "Quick lane"
+    sheet_link = 'https://docs.google.com/spreadsheets/d/1o3T_Q0AOdme6gug9GL_yB4xpojPBTpaE7YiObg-xAXc/edit#gid=951347341'
 
     update_gsheet(brand_name, sheet_link)
     # main_test()
