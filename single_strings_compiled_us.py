@@ -71,6 +71,7 @@ replacements = {
 
 replacement_7days = {'mon-sun : 00:00-00:00':[
 '24/7',
+'24-7',
 'open 24/7',
 'all day',
 'all:day',
@@ -449,7 +450,7 @@ def formated_output_dict(value):
 
 
 def main_test():
-    values = ["Mo:0700-1430,Tu:0700-1430,Wed:0700-1430,Thu:0700-1430,Fri:0700-1430,Sat:1100-1400"]
+    values = ["24-7"]
     # values = ["Monday-10:00:00-21:00:00,Tuesday:10:00:00-21:00:00,Wednesday:10:00:00-21:00:00,Thursday:10:00:00-21:00:00,Friday:10:00:00-21:00:00,Saturday:10:00:00-21:00:00,Sunday:11:00:00-18:00:00","Monday:Open 24 hours,Tuesday:Open 24 hours,Wednesday:Open 24 hours,Thursday:Open 24 hours,Friday:Open 24 hours,Saturday:Open 24 hours,Sunday:Open 24 hours", "Monday11:00 AM-10:00 PM,Tuesday-11:00 AM:10:00 PM,Wednesday-11:00 AM:10:00 PM,Thursday-11:00 AM:10:00 PM,Friday-11:00 AM:11:00 PM,Saturday-11:00 AM:11:00 PM,Sunday-11:00 AM:9:00 PM"]
     for value in values:
         if value is None:
