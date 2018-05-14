@@ -75,6 +75,7 @@ replacements = {
 
 replacement_7days = {'mon-sun : 00:00-00:00':[
 '24/7',
+'24-7',
 'open 24/7',
 'open 24 hours',
 '24 Hours Open',
@@ -740,8 +741,8 @@ if __name__ == "__main__":
     #    SELECT brand_name FROM O_O_DATA.scrapers_hoo
     #    group by brand_name;
     #    """
-    brand_name = "Einstein Bros Bagels"
-    sheet_link = 'https://docs.google.com/spreadsheets/d/1PBnV5LYaxNbF5QxELtAfzmempp-fqOl2TlGPJlSm1gY/edit?ts=58f0c123#gid=1147798958'
+    brand_name = "Sheetz"
+    sheet_link = 'https://docs.google.com/spreadsheets/d/1gSi0kAIj9AhYXrjPs_Gu5E3wVZ8zfqxpHb1PhhUm27c/edit?ts=58e4bc7a#gid=594926451'
 
     update_gsheet(brand_name, sheet_link)
     # main_test()
