@@ -149,7 +149,7 @@ def without_am_pm(matchobj):
     start_min = int(obj.get('start_min').strip())
     end_min = int(obj.get('end_min').strip())
     end_hour = int(obj.get('end_hour').strip('-'))
-
+    print 'start_min', start_min
     if start_hour > 23:
         start_hour = 00
     if end_hour > 23:
@@ -204,8 +204,8 @@ def convert_to_24h(value):
     raw_convertion = re.sub(pattern, replace_hours_for_match, value)
     print raw_convertion, 'raw--------------'
     # valid_pattern = r"(?P<start>\d{2})(?P<mins>.*?)(?P<end>[-]{2})"
-    valid_pattern = r'(?P<start_hour>\d{1,2}):(?P<start_min>\d{2})\s*-\s*(?P<end_hour>\d{1,2}):(?P<end_min>\d{2})'
-
+    # valid_pattern = r'(?P<start_hour>\d{1,2}):(?P<start_min>\d{2})\s*-\s*(?P<end_hour>\d{1,2}):(?P<end_min>\d{2})'
+    valid_pattern = r"(?P<start_hour>\d{1,2}):(?P<start_min>\d{2}):*(?P<start_sec>\d{2})*\s*-\s*(?P<end_hour>\d{1,2}):(?P<end_min>\d{2}):*(?P<end_sec>\d{2})*"
     valid_convert = re.sub(valid_pattern, without_am_pm, raw_convertion)
     print valid_convert, 'valid_convert--------------'
 
@@ -450,7 +450,7 @@ def formated_output_dict(value):
 
 
 def main_test():
-    values = ["24-7"]
+    values = ["Sunday: 11:20 - 8:00, Saturday: closed, Thursday: 09:30:00 - 21:00:00, Tuesday: 09:30:00 - 21:00:00, Friday: 09:30:00 - 21:00:00, Monday: Closed - Closed, Wednesday: 09:30:00 - 21:00:00"]
     # values = ["Monday-10:00:00-21:00:00,Tuesday:10:00:00-21:00:00,Wednesday:10:00:00-21:00:00,Thursday:10:00:00-21:00:00,Friday:10:00:00-21:00:00,Saturday:10:00:00-21:00:00,Sunday:11:00:00-18:00:00","Monday:Open 24 hours,Tuesday:Open 24 hours,Wednesday:Open 24 hours,Thursday:Open 24 hours,Friday:Open 24 hours,Saturday:Open 24 hours,Sunday:Open 24 hours", "Monday11:00 AM-10:00 PM,Tuesday-11:00 AM:10:00 PM,Wednesday-11:00 AM:10:00 PM,Thursday-11:00 AM:10:00 PM,Friday-11:00 AM:11:00 PM,Saturday-11:00 AM:11:00 PM,Sunday-11:00 AM:9:00 PM"]
     for value in values:
         if value is None:
