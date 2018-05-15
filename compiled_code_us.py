@@ -203,8 +203,8 @@ def convert_to_24h(value):
     raw_convertion = re.sub(pattern, replace_hours_for_match, value)
     print raw_convertion, 'raw--------------'
     # valid_pattern = r"(?P<start>\d{2})(?P<mins>.*?)(?P<end>[-]{2})"
-    valid_pattern = r'(?P<start_hour>\d{1,2}):(?P<start_min>\d{2})\s*-\s*(?P<end_hour>\d{1,2}):(?P<end_min>\d{2})'
-
+    # valid_pattern = r'(?P<start_hour>\d{1,2}):(?P<start_min>\d{2})\s*-\s*(?P<end_hour>\d{1,2}):(?P<end_min>\d{2})'
+    valid_convert = r"(?P<start_hour>\d{1,2}):(?P<start_min>\d{2}):*(?P<start_sec>\d{2})*\s*-\s*(?P<end_hour>\d{1,2}):(?P<end_min>\d{2}):*(?P<end_sec>\d{2})*"
     valid_convert = re.sub(valid_pattern, without_am_pm, raw_convertion)
     print valid_convert, 'valid_convert--------------'
 
@@ -741,8 +741,8 @@ if __name__ == "__main__":
     #    SELECT brand_name FROM O_O_DATA.scrapers_hoo
     #    group by brand_name;
     #    """
-    brand_name = "Sheetz"
-    sheet_link = 'https://docs.google.com/spreadsheets/d/1gSi0kAIj9AhYXrjPs_Gu5E3wVZ8zfqxpHb1PhhUm27c/edit?ts=58e4bc7a#gid=594926451'
+    brand_name = "Chase"
+    sheet_link = 'https://docs.google.com/spreadsheets/d/1n4yEE2OqR2vF0wyAzmVsvQ66PTw87UKkOA9nV-LRgNA/edit#gid=1215697394'
 
     update_gsheet(brand_name, sheet_link)
     # main_test()
