@@ -204,7 +204,7 @@ def convert_to_24h(value):
     print raw_convertion, 'raw--------------'
     # valid_pattern = r"(?P<start>\d{2})(?P<mins>.*?)(?P<end>[-]{2})"
     # valid_pattern = r'(?P<start_hour>\d{1,2}):(?P<start_min>\d{2})\s*-\s*(?P<end_hour>\d{1,2}):(?P<end_min>\d{2})'
-    valid_convert = r"(?P<start_hour>\d{1,2}):(?P<start_min>\d{2}):*(?P<start_sec>\d{2})*\s*-\s*(?P<end_hour>\d{1,2}):(?P<end_min>\d{2}):*(?P<end_sec>\d{2})*"
+    valid_pattern = r"(?P<start_hour>\d{1,2}):(?P<start_min>\d{2}):*(?P<start_sec>\d{2})*\s*-\s*(?P<end_hour>\d{1,2}):(?P<end_min>\d{2}):*(?P<end_sec>\d{2})*"
     valid_convert = re.sub(valid_pattern, without_am_pm, raw_convertion)
     print valid_convert, 'valid_convert--------------'
 
