@@ -59,7 +59,7 @@ replacements = {
     # ', ': ['/'],
     '&': ['\u0026', 'and'],
     # 'mon-sun : 00:00-00:00':['24/7', 'open 24 hours'],
-    '00:00-00:00': ['24 hours','24:00rs', '24:00urs', '24:00urs', '24:00s','all day', 'all:day','24 hrs'],
+    '00:00-00:00': ['open24','24 hours','24:00rs', '24:00urs', '24:00urs', '24:00s','all day', 'all:day','24 hrs'],
      '-': [' through ', ' to ', ' thuough ', '\xe2\x80\x93'],
        # '00:00': ['24:00'],
        # '00:30': ['24:30'],
@@ -453,7 +453,7 @@ def formated_output_dict(value):
 
 
 def main_test():
-    values = ["monday:  1200 -  1200"]
+    values = ["Monday - Friday 08:00 AM to 10:00 PM,Saturday 08:00 AM to 9:00 PM,Sunday 12:00 AM to 12:00 AM"]
     # values = ["Monday-10:00:00-21:00:00,Tuesday:10:00:00-21:00:00,Wednesday:10:00:00-21:00:00,Thursday:10:00:00-21:00:00,Friday:10:00:00-21:00:00,Saturday:10:00:00-21:00:00,Sunday:11:00:00-18:00:00","Monday:Open 24 hours,Tuesday:Open 24 hours,Wednesday:Open 24 hours,Thursday:Open 24 hours,Friday:Open 24 hours,Saturday:Open 24 hours,Sunday:Open 24 hours", "Monday11:00 AM-10:00 PM,Tuesday-11:00 AM:10:00 PM,Wednesday-11:00 AM:10:00 PM,Thursday-11:00 AM:10:00 PM,Friday-11:00 AM:11:00 PM,Saturday-11:00 AM:11:00 PM,Sunday-11:00 AM:9:00 PM"]
     for value in values:
         if value is None:
