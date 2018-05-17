@@ -64,7 +64,7 @@ replacements = {
     # ', ': ['/'],
     '&': ['\u0026', 'and'],
     'mon-sun : 00:00-00:00':['24/7', 'open 24 hours'],
-    '00:00-00:00': ['24 hours','24:00rs', '24:00urs', '24:00urs', '24:00s', '24 hrs', 'all day', 'all:day'],
+    '00:00-00:00': ['open24','24 hours','24:00rs', '24:00urs', '24:00urs', '24:00s', '24 hrs', 'all day', 'all:day'],
      '-': [' through ', ' to ', ' thuough ', '\xe2\x80\x93'],
        # '00:00': ['24:00'],
        # '00:30': ['24:30'],
@@ -742,8 +742,8 @@ if __name__ == "__main__":
     #    SELECT brand_name FROM O_O_DATA.scrapers_hoo
     #    group by brand_name;
     #    """
-    brand_name = "Giant Food Stores"
-    sheet_link = 'https://docs.google.com/spreadsheets/d/1yR_MBqAuC-GAA0tl1aUoqRsASqx8JYQpB9VMfmcQobA/edit?ts=59cc998b#gid=1349141326'
+    brand_name = "T-Mobile"
+    sheet_link = 'https://docs.google.com/spreadsheets/d/1naBJo7FYMGPHLUvUUr_B623_YZjhFQZM1-Pgw5pt5rs/edit?ts=58917b50#gid=90799887'
 
     update_gsheet(brand_name, sheet_link)
     # main_test()
