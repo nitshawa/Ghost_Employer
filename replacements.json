@@ -1,0 +1,44 @@
+{
+    "mon": ["monday", "montag", "lundi", "lunes", "mon-mon", "mo ", "mo:"],
+    "mon-":["mo-", "m-"],
+
+    "tue": ["tuesday", "dienstag", "mardi", "martes", "tues", "tue-tue", "tu ", "tu:"],
+    "tue-":["tu-"],
+
+    "wed": ["wednesday", "mittwoch", "mercredi", "mircoles", "wed-wed", "wen", "we ","we:"],
+    "wed-":["we-"],
+
+    "thu": ["thursday", "donnerstag", "jeudi", "jueves", "thurs", "thur","thr", "thu-thu", "th ", "th:"],
+    "thu-":["th-"],
+
+    "fri": ["friday", "freitag", "vendredi", "viernes", "fir", "fri-fri",  "fr ", "fr-",  "fr:"],
+    "fri-":["fr-"],
+
+    "sat": ["saturday", "samstag", "samedi", "sabado", "sat-sat", "sa ", "sa-", "sa:"],
+    "sat-":["sa-"],
+
+    "sun": ["sunday", "sonntag", "dimanche", "domingo", "sun-sun" , "su ", "su-", "su:"],
+    "sun-":["su-"],
+
+    "closed": ["zamkniety", "cerrado", "ferme", "geschlossen"],
+
+    "open": ["otwarty", "abierto", "ouvert", "offen"],
+
+    "mon-sun" : ["daily","every day", "everyday", "all week", "7 days a week", "seven days a week", "7 days", "per day", "7days"],
+
+    "[]": ["closed - closed", "closed-closed", "close - close", "close-close", "closed", "close"],
+
+    "mon-fri": ["weekday_hours", "weekdays", "weekday", "m-f", "mo-fr", "mon-f ", "m-f "],
+    
+    " ": ["_hours", "hrs", "black", " (est)", "open", "_"],
+    
+    "sat-sun" : ["weekends", "weekend"],
+    
+    "&": ["\u0026", "and"],
+    
+    "00:00-00:00": ["open24","24 hours","24:00rs", "24:00urs", "24:00urs", "24:00s","all day", "all:day","24 hrs"],
+    
+    "-": [" through ", " to ", " thuough "],
+    
+    " 00:00 ": ["midnight"]
+}
