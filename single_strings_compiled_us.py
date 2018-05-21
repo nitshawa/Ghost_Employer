@@ -54,8 +54,9 @@ replacements = {
     # ' to ': [' a '],
     'mon-sun' : ['daily','every day', 'everyday', 'all week', '7 days a week', 'seven days a week', '7 days', 'per day', '7days'],
     '[]': ['closed - closed', 'closed-closed', 'close - close', 'close-close', 'closed', 'close'],
-    'mon-fri': ['weekday_hours', 'weekday', 'weekdays', 'm-f', 'mo-fr',  'mon-f ', 'm-f '], #for simmons bank only one m-f
+    'mon-fri': ['weekday_hours', 'weekdays', 'weekday', 'm-f', 'mo-fr',  'mon-f ', 'm-f '], #for simmons bank only one m-f
     ' ': ['_hours', 'hrs', 'black', ' (est)', 'open', '_'],
+    'sat-sun' : ['weekends', 'weekend'],
     # ', ': ['/'],
     '&': ['\u0026', 'and'],
     # 'mon-sun : 00:00-00:00':['24/7', 'open 24 hours'],
@@ -109,9 +110,6 @@ def replace_keywords(value):
         for rep in values:
             try:
                 value = value.replace(rep, key)
-                # if before_replacement != value:
-                #     print before_replacement, value
-                #     continue
             except:
                 continue
 
@@ -146,11 +144,12 @@ def replace_hour_groups(value):
 def without_am_pm(matchobj):
 
     obj = matchobj.groupdict()
+
     start_hour = int(obj.get('start_hour').strip())
     start_min = int(obj.get('start_min').strip())
     end_min = int(obj.get('end_min').strip())
     end_hour = int(obj.get('end_hour').strip('-'))
-    print 'start_min', start_min
+    print 'before conversion without ampm---', "{0:02d}:{1:02d}-{2:02d}:{3:02d}".format(start_hour,start_min, end_hour, end_min)
     if start_hour > 23:
         start_hour = 00
     if end_hour > 23:
@@ -163,7 +162,7 @@ def without_am_pm(matchobj):
         end_min = 00
     open_close_hours_difference = end_hour - start_hour
 
-    print 'difference of end-start', open_close_hours_difference
+    print 'open_close_hours_difference', open_close_hours_difference
     if  start_hour != 0 and end_hour != 0:
         if open_close_hours_difference < 3 and open_close_hours_difference >= 0 :
             end_hour = (end_hour + 12) % 24
@@ -203,12 +202,12 @@ def replace_hours_for_match(matchobj):
 def convert_to_24h(value):
     pattern =  r"""(?P<hour>\d{1,2})[:hH]{0,1}(?P<min>\d{0,2})[:.hH]{0,1}(?P<sec>\d{0,2})[' ']{0,1}(?P<ampm>a |am|a.m.|am.|a.m|a m|a|p |pm|p.m.|pm.|p.m|p m|p)"""
     raw_convertion = re.sub(pattern, replace_hours_for_match, value)
-    print raw_convertion, 'raw--------------'
+    print  'raw--------------', raw_convertion
     check_ampm = re.search(pattern, value)
     if not check_ampm:
         valid_pattern = r"(?P<start_hour>\d{1,2}):(?P<start_min>\d{2}):*(?P<start_sec>\d{2})*\s*-\s*(?P<end_hour>\d{1,2}):(?P<end_min>\d{2}):*(?P<end_sec>\d{2})*"
         valid_convert = re.sub(valid_pattern, without_am_pm, raw_convertion)
-        print valid_convert, 'valid_convert--------------'
+        print  'valid_convert--------------', valid_convert
 
         return valid_convert
     else:
@@ -224,6 +223,7 @@ def replace_with_unstructured_hours(matchobj):
 
 
 def replace_open_close_delimeter(value):
+    # eg:  0000-0400 / 0500-1400 lunch break
     pattern = r'(\d{1,2}:\d{2}[:\d{2}]*)[\D]*(\d{1,2}:\d{2}[:\d{2}]*)'
     # pattern = r'(\d{2}:\d{2})[\s-]*(\d{2}:\d{2})'
     return re.sub(pattern, replace_with_unstructured_hours, value)
@@ -453,7 +453,7 @@ def formated_output_dict(value):
 
 
 def main_test():
-    values = ["Monday - Friday 08:00 AM to 10:00 PM,Saturday 08:00 AM to 9:00 PM,Sunday 12:00 AM to 12:00 AM"]
+    values = ["Weekdays: 10am-8pm, Weekends: 10am-8pm"]
     # values = ["Monday-10:00:00-21:00:00,Tuesday:10:00:00-21:00:00,Wednesday:10:00:00-21:00:00,Thursday:10:00:00-21:00:00,Friday:10:00:00-21:00:00,Saturday:10:00:00-21:00:00,Sunday:11:00:00-18:00:00","Monday:Open 24 hours,Tuesday:Open 24 hours,Wednesday:Open 24 hours,Thursday:Open 24 hours,Friday:Open 24 hours,Saturday:Open 24 hours,Sunday:Open 24 hours", "Monday11:00 AM-10:00 PM,Tuesday-11:00 AM:10:00 PM,Wednesday-11:00 AM:10:00 PM,Thursday-11:00 AM:10:00 PM,Friday-11:00 AM:11:00 PM,Saturday-11:00 AM:11:00 PM,Sunday-11:00 AM:9:00 PM"]
     for value in values:
         if value is None:
