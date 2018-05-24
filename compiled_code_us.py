@@ -242,8 +242,13 @@ def time_day_dict(value):
         if end == -1: # to get last dayname
             end = len(value)
         raw_days = value[start:end]
-        days = ' '.join(raw_days.replace('(', '').replace(')','').replace(',', '').replace('.', '').replace(':','').split()).strip('-').strip()
-        days_hours[days] = hour
+        days = raw_days.strip(',.:').split(',')
+        print 'time day dict >>', days
+        for day in days:
+            day = day.strip(" ,.:")
+            print day
+            days_hours[day] = hour
+
         indexer = start
     return days_hours
 
@@ -254,26 +259,30 @@ def string_to_dict(value):
         mon. & thu. [(10:00,20:00)],tue., wed., fri. [(10:00,17:30)],sat. [(10:00,17:30)],sun. [(24:00,17:00)]
     """
     print 'entering string to dict ', value
-
     days_hours = {}
     pattern = "(\[.*?\])"
     hours = re.findall(pattern, value)
     indexer = 0
     print 'value.find("[")', value.find("[")
-    # below condition to trigger if traling spaces comes from 24 hours conversion
-    if value.find("[") < 2:
+    if value.find("[") == 0:
       print 'after string to dict > ', value
-
       return time_day_dict(value)
 
 
     for hour in hours:
+
         start = value.find("[" ,indexer)
         end = value.find(']', start) + 1
+
         raw_days = re.findall(r'^(.*?)\[', value[indexer: end])[0]
         # need to clean day names before this point
-        days = ' '.join(raw_days.replace(',', '').replace('.', '').replace(':','').split()).strip('-').strip()
-        days_hours[days] = hour
+        # days = ' '.join(raw_days.replace(',', '').replace('.', '').replace(':','').split()).strip('-').strip()
+        days = raw_days.strip(',.:').split(',')
+        print 'string to dict days', raw_days
+        for day in days:
+            day = day.strip(" ,.:")
+            print day
+            days_hours[day] = hour
         indexer = end
     print 'after string to dict > ', days_hours
     return days_hours
@@ -744,8 +753,8 @@ if __name__ == "__main__":
     #    SELECT brand_name FROM O_O_DATA.scrapers_hoo
     #    group by brand_name;
     #    """
-    brand_name = "Ulta Beauty"
-    sheet_link = 'https://docs.google.com/spreadsheets/d/1NCrwgIKN4xuH6I7kduK51WCp_mXI4PB_-EVtHKL3Wak/edit?ts=59031b1c#gid=1730786319'
+    brand_name = "Chipotle"
+    sheet_link = 'https://docs.google.com/spreadsheets/d/1hDarBlM_Mq1Xg0j8kYiMeeDLMgdd2h0Gjh9QdG-WaHw/edit?ts=58eb38e5#gid=1886328971'
 
     update_gsheet(brand_name, sheet_link)
     # main_test()
