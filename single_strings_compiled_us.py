@@ -241,8 +241,13 @@ def time_day_dict(value):
         if end == -1: # to get last dayname
             end = len(value)
         raw_days = value[start:end]
-        days = ' '.join(raw_days.replace('(', '').replace(')','').replace(',', '').replace('.', '').replace(':','').split()).strip('-').strip()
-        days_hours[days] = hour
+        days = raw_days.strip(',.:').split(',')
+        print 'time day dict >>', days
+        for day in days:
+            day = day.strip(" ,.:")
+            print day
+            days_hours[day] = hour
+
         indexer = start
     return days_hours
 
@@ -270,11 +275,17 @@ def string_to_dict(value):
 
         raw_days = re.findall(r'^(.*?)\[', value[indexer: end])[0]
         # need to clean day names before this point
-        days = ' '.join(raw_days.replace(',', '').replace('.', '').replace(':','').split()).strip('-').strip()
-        days_hours[days] = hour
+        # days = ' '.join(raw_days.replace(',', '').replace('.', '').replace(':','').split()).strip('-').strip()
+        days = raw_days.strip(',.:').split(',')
+        print 'string to dict days', raw_days
+        for day in days:
+            day = day.strip(" ,.:")
+            print day
+            days_hours[day] = hour
         indexer = end
     print 'after string to dict > ', days_hours
     return days_hours
+
 
 
 def day_expand(days_hours):
