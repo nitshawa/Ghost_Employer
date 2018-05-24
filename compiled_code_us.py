@@ -264,7 +264,8 @@ def string_to_dict(value):
     hours = re.findall(pattern, value)
     indexer = 0
     print 'value.find("[")', value.find("[")
-    if value.find("[") == 0:
+    # below condition to trigger if traling spaces comes from 24 hours conversion
+    if value.find("[") < 2:
       print 'after string to dict > ', value
       return time_day_dict(value)
 
