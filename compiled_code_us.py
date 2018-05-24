@@ -203,13 +203,15 @@ def convert_to_24h(value):
     pattern =  r"""(?P<hour>\d{1,2})[:hH]{0,1}(?P<min>\d{0,2})[:.hH]{0,1}(?P<sec>\d{0,2})[' ']{0,1}(?P<ampm>a |am|a.m.|am.|a.m|a m|a|p |pm|p.m.|pm.|p.m|p m|p)"""
     raw_convertion = re.sub(pattern, replace_hours_for_match, value)
     print raw_convertion, 'raw--------------'
-    # valid_pattern = r"(?P<start>\d{2})(?P<mins>.*?)(?P<end>[-]{2})"
-    # valid_pattern = r'(?P<start_hour>\d{1,2}):(?P<start_min>\d{2})\s*-\s*(?P<end_hour>\d{1,2}):(?P<end_min>\d{2})'
-    valid_pattern = r"(?P<start_hour>\d{1,2}):(?P<start_min>\d{2}):*(?P<start_sec>\d{2})*\s*-\s*(?P<end_hour>\d{1,2}):(?P<end_min>\d{2}):*(?P<end_sec>\d{2})*"
-    valid_convert = re.sub(valid_pattern, without_am_pm, raw_convertion)
-    print valid_convert, 'valid_convert--------------'
+    check_ampm = re.search(pattern, value)
+    if not check_ampm:
+        valid_pattern = r"(?P<start_hour>\d{1,2}):(?P<start_min>\d{2}):*(?P<start_sec>\d{2})*\s*-\s*(?P<end_hour>\d{1,2}):(?P<end_min>\d{2}):*(?P<end_sec>\d{2})*"
+        valid_convert = re.sub(valid_pattern, without_am_pm, raw_convertion)
+        print  'valid_convert--------------', valid_convert
 
-    return valid_convert
+        return valid_convert
+    else:
+        return raw_convertion
 
 
 def replace_with_structured_hours(matchobj):
@@ -742,8 +744,8 @@ if __name__ == "__main__":
     #    SELECT brand_name FROM O_O_DATA.scrapers_hoo
     #    group by brand_name;
     #    """
-    brand_name = "T-Mobile"
-    sheet_link = 'https://docs.google.com/spreadsheets/d/1naBJo7FYMGPHLUvUUr_B623_YZjhFQZM1-Pgw5pt5rs/edit?ts=58917b50#gid=90799887'
+    brand_name = "Ulta Beauty"
+    sheet_link = 'https://docs.google.com/spreadsheets/d/1NCrwgIKN4xuH6I7kduK51WCp_mXI4PB_-EVtHKL3Wak/edit?ts=59031b1c#gid=1730786319'
 
     update_gsheet(brand_name, sheet_link)
     # main_test()
