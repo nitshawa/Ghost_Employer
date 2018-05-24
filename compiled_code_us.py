@@ -200,7 +200,7 @@ def replace_hours_for_match(matchobj):
 
 def convert_to_24h(value):
     # print value, 'value------'
-    pattern =  r"""(?P<hour>\d{1,2})[:hH]{0,1}(?P<min>\d{0,2})[:.hH]{0,1}(?P<sec>\d{0,2})[' ']{0,1}(?P<ampm>a |am|a.m.|am.|a.m|a m|a|p |pm|p.m.|pm.|p.m|p m|p)"""
+    pattern =  r"""(?P<hour>\d{1,2})[:.hH]{0,1}(?P<min>\d{0,2})[:.hH]{0,1}(?P<sec>\d{0,2})[' ']{0,1}(?P<ampm>a |am|a.m.|am.|a.m|a m|a|p |pm|p.m.|pm.|p.m|p m|p)"""
     raw_convertion = re.sub(pattern, replace_hours_for_match, value)
     print raw_convertion, 'raw--------------'
     check_ampm = re.search(pattern, value)
