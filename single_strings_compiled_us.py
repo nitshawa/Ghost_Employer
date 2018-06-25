@@ -4,23 +4,23 @@
 import sys
 import re
 import csv
-import mysql.connector
+# import mysql.connector
 import json
 import ast
 import datetime
 from dateutil import parser
 reload(sys)
 sys.setdefaultencoding("utf-8")
-cnx = mysql.connector.connect(
-    user='root',
-    password='xad',
-    host='127.0.0.1',
-    database='scrapers',
-    charset='utf8',
-    use_unicode=True
-)
+# cnx = mysql.connector.connect(
+#     user='root',
+#     password='xad',
+#     host='127.0.0.1',
+#     database='scrapers',
+#     charset='utf8',
+#     use_unicode=True
+# )
 
-cursor = cnx.cursor()
+# cursor = cnx.cursor()
 
 day_list = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 days_hours = {}
@@ -82,7 +82,8 @@ replacement_7days = {'mon-sun : 00:00-00:00':[
 'open 24 hours per day may vary',
 'open 24 hrs',
 '24 hours, 7 days a week',
-'24 hours open']}
+'24 hours open',
+'Seven days/week']}
 
 def remove_html_tags(value):
   tags = re.compile('<.*?>')
@@ -277,7 +278,7 @@ def string_to_dict(value):
         raw_days = re.findall(r'^(.*?)\[', value[indexer: end])[0]
         # need to clean day names before this point
         # days = ' '.join(raw_days.replace(',', '').replace('.', '').replace(':','').split()).strip('-').strip()
-        days = raw_days.strip(',.:').split(',')
+        days = raw_days.strip(' ,.:').split(',')
         print 'string to dict days', raw_days
         for day in days:
             day = day.strip(" ,.:")
@@ -312,7 +313,7 @@ def day_expand(days_hours):
             """if dash separator given in keys"""
             del days_hours[day]
 
-            start_day_index, end_day_index = [day_list.index(x.strip(' ;/,')) for x in day.split('-')]
+            start_day_index, end_day_index = [day_list.index(x.strip(' /,;-.')) for x in day.split('-')]
 
             if end_day_index <= start_day_index:
                 expanded_days = day_list[start_day_index:] + day_list[:end_day_index + 1]
@@ -464,7 +465,7 @@ def formated_output_dict(value):
 
 
 def main_test():
-    values = [" monday, fri 8.30am-6.30pm , thur 8.30am-5.30pm , sat 9am-12pm , sun closed"]
+    values = [" Monday: 11:00 - 23:00, Tuesday: 11:00 - 23:00, Wednesday: 11:00 - 23:00, Thursday: 11:00 - 23:00, Friday: 11:00 - 0:00, Saturday: 11:00 - 0:00, Sunday: 11:00 - 22:00"]
     for value in values:
         if value is None:
             continue
@@ -557,5 +558,5 @@ if __name__ == "__main__":
 
     main_test()
 
-cursor.close()
-cnx.close()
+# cursor.close()
+# cnx.close()
