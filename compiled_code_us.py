@@ -4,7 +4,7 @@
 import sys
 import re
 import csv
-import mysql.connector
+# import mysql.connector
 import json
 import ast
 import datetime
@@ -15,18 +15,18 @@ import sys
 #from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
-reload(sys)
-sys.setdefaultencoding("utf-8")
-cnx = mysql.connector.connect(
-    user='root',
-    password='xad',
-    host='127.0.0.1',
-    database='scrapers',
-    charset='utf8',
-    use_unicode=True
-)
+# reload(sys)
+# sys.setdefaultencoding("utf-8")
+# cnx = mysql.connector.connect(
+#     user='root',
+#     password='xad',
+#     host='127.0.0.1',
+#     database='scrapers',
+#     charset='utf8',
+#     use_unicode=True
+# )
 
-cursor = cnx.cursor()
+# cursor = cnx.cursor()
 
 day_list = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 days_hours = {}
@@ -85,7 +85,8 @@ replacement_7days = {'mon-sun : 00:00-00:00':[
 'open 24 hours per day may vary',
 'open 24 hrs',
 '24 hours, 7 days a week',
-'24 hours open']}
+'24 hours open',
+'Seven days/week']}
 
 def remove_html_tags(value):
   tags = re.compile('<.*?>')
@@ -242,7 +243,7 @@ def time_day_dict(value):
         if end == -1: # to get last dayname
             end = len(value)
         raw_days = value[start:end]
-        days = raw_days.strip(',.:').split(',')
+        days = raw_days.strip(' -,.:').split(',')
         print 'time day dict >>', days
         for day in days:
             day = day.strip(" ,.:")
@@ -278,8 +279,8 @@ def string_to_dict(value):
         raw_days = re.findall(r'^(.*?)\[', value[indexer: end])[0]
         # need to clean day names before this point
         # days = ' '.join(raw_days.replace(',', '').replace('.', '').replace(':','').split()).strip('-').strip()
-        days = raw_days.strip(',.:').split(',')
-        print 'string to dict days', raw_days
+        days = raw_days.strip(' ,.:').split(',')
+        print 'string to dict days', days
         for day in days:
             day = day.strip(" ,.:")
             print day
@@ -313,7 +314,7 @@ def day_expand(days_hours):
             """if dash separator given in keys"""
             del days_hours[day]
 
-            start_day_index, end_day_index = [day_list.index(x.strip(' /,')) for x in day.split('-')]
+            start_day_index, end_day_index = [day_list.index(x.strip(' /,;-.')) for x in day.split('-')]
 
             if end_day_index <= start_day_index:
                 expanded_days = day_list[start_day_index:] + day_list[:end_day_index + 1]
@@ -470,21 +471,26 @@ def formated_output_dict(value):
         return []
     return final_output
 
-def update_gsheet(brand_name, sheet_link):
+
+def download_gsheet(brand_name, sheet_link):
     sheet_key = re.findall(r'\/d\/(.*?)\/edit', sheet_link)[0]
     gc = pygsheets.authorize()
 
     sht1 = gc.open_by_key(sheet_key)
-    wks1 = sht1.worksheet_by_title("validated")
-    wks1.export(pygsheets.ExportType.CSV, brand_name + '.csv')
+    wks1 = sht1.worksheet_by_title("validated").get_all_values()
+    wks1 = [[i.encode('utf-8') for i in x] for x in wks1]
+    downloaded_csv = csv.writer(open('/Users/nitinsharma/Desktop/current_project/hours_of_operation/dump/' + brand_name + '.csv', 'wb'))
+    downloaded_csv.writerows(wks1)
 
-    output_csv = csv.writer(open( "/media/nitin/809E47539E4740C0/HD/TestCodes/hours_of_operation/testing/compiled_code_us/shared_brands/done_" +brand_name + '.csv', 'wb'))
+def update_gsheet(brand_name, sheet_link):
+    download_gsheet(brand_name, sheet_link)
+    output_csv = csv.writer(open( "/Users/nitinsharma/Desktop/current_project/hours_of_operation/shared_brands/done_" +brand_name + '.csv', 'wb'))
     output_csv.writerow(["brand_name", "store_name", "type", "address_1",
         "city", "state", "zipcode", "country_code", "phone_number",
          "primary_sic", "secondary_sic", "latitude", "longitude",
          "raw_business_hours", "debug_formated_business_hours","converted_business_hours", "brand_id", "raw_address", "updated_date", "url"])
 
-    input_csv = csv.reader(open(brand_name + '.csv', 'rb'))
+    input_csv = csv.reader(open('/Users/nitinsharma/Desktop/current_project/hours_of_operation/dump/' + brand_name + '.csv', 'rb'))
     cursor_list = [x for x in input_csv][1:]
     for value in cursor_list:
 
@@ -546,7 +552,7 @@ def update_gsheet(brand_name, sheet_link):
                 y = replace_hour_groups(y)
                 # print y, 'replace_hour_groups'
                 not_matched = replace_hour_groups(y)
-                y = string_to_dict(y)
+                y = string_to_dict(y.strip(' ,.-;'))
 
                 if isinstance(y, dict):
                     try:
@@ -590,162 +596,162 @@ def update_gsheet(brand_name, sheet_link):
 
 
 
-def main_test():
-    # query =  """
-    #             SELECT raw_business_hours FROM O_O_DATA.scrapers_hoo;
-    #                """
-    # cursor.execute(query)
-    # # input_all_brands_list = [x for x in cursor.fetchall()]
-    # # for row in input_all_brands_list:
-    # #     brand_name = row[0]
-    # #     print brand_name
-    #from validated database
-    brand_name = 'Walmart'
-    query = """
-       SELECT * FROM O_O_DATA.scrapers_hoo
-       WHERE brand_name LIKE \"%"""+ brand_name + """%\";
-        """
-    # # and raw_business_hours like "%24:00-18:00%" limit 2
-    # # # #    #AND country_code = "US";
-    # # # # # print query
-    # # # # # exit()
-    cursor.execute(query)
+# def main_test():
+#     # query =  """
+#     #             SELECT raw_business_hours FROM O_O_DATA.scrapers_hoo;
+#     #                """
+#     # cursor.execute(query)
+#     # # input_all_brands_list = [x for x in cursor.fetchall()]
+#     # # for row in input_all_brands_list:
+#     # #     brand_name = row[0]
+#     # #     print brand_name
+#     #from validated database
+#     brand_name = 'Walmart'
+#     query = """
+#        SELECT * FROM O_O_DATA.scrapers_hoo
+#        WHERE brand_name LIKE \"%"""+ brand_name + """%\";
+#         """
+#     # # and raw_business_hours like "%24:00-18:00%" limit 2
+#     # # # #    #AND country_code = "US";
+#     # # # # # print query
+#     # # # # # exit()
+#     cursor.execute(query)
 
-    output_csv = csv.writer(open( "/media/nitin/809E47539E4740C0/HD/TestCodes/hours_of_operation/testing/compiled_code_us/attemp2/" + brand_name + ' store_hours.csv', 'wb'))
-    # output_csv.writerow(['input_string', 'output_dict', "unmatched"])
-    output_csv.writerow(["brand_name", "store_name", "type", "address_1",
-        "city", "state", "zipcode", "country_code", "phone_number",
-         "primary_sic", "secondary_sic", "latitude", "longitude",
-         "raw_business_hours", "debug_formated_business_hours","converted_business_hours", "brand_id", "raw_address", "updated_date", "url"])
+#     output_csv = csv.writer(open( "/media/nitin/809E47539E4740C0/HD/TestCodes/hours_of_operation/testing/compiled_code_us/attemp2/" + brand_name + ' store_hours.csv', 'wb'))
+#     # output_csv.writerow(['input_string', 'output_dict', "unmatched"])
+#     output_csv.writerow(["brand_name", "store_name", "type", "address_1",
+#         "city", "state", "zipcode", "country_code", "phone_number",
+#          "primary_sic", "secondary_sic", "latitude", "longitude",
+#          "raw_business_hours", "debug_formated_business_hours","converted_business_hours", "brand_id", "raw_address", "updated_date", "url"])
 
-    # from convert sheets
-    # input_csv = csv.reader(open('/home/nitin/Downloads/Acura_US - Validated 2017-11.csv', 'rb'))
-    # cursor_list = [
-    # 'today: 6:00 am - 11:00 pm/ 6:00 am - 11:00 pm, tomorrow: 6:00 am - 11:00 pm thursday: 6:00 am - 11:00 pm friday: 6:00 am - 11:00 pm saturday: 6:00 am - 11:00 pm sunday: 6:00 am - 11:00 pm monday: 6:00 am - 11:00 pm']
-    # # 'mon-06:00:24:00 tue-06:00:24:00 wed-06:00:24:00 thr-06:00:24:00 fri-06:00:24:00 sat-06:00:24:00 sun-06:00:24:00']
-    # cursor_list = [x for x in input_csv][1:]
+#     # from convert sheets
+#     # input_csv = csv.reader(open('/home/nitin/Downloads/Acura_US - Validated 2017-11.csv', 'rb'))
+#     # cursor_list = [
+#     # 'today: 6:00 am - 11:00 pm/ 6:00 am - 11:00 pm, tomorrow: 6:00 am - 11:00 pm thursday: 6:00 am - 11:00 pm friday: 6:00 am - 11:00 pm saturday: 6:00 am - 11:00 pm sunday: 6:00 am - 11:00 pm monday: 6:00 am - 11:00 pm']
+#     # # 'mon-06:00:24:00 tue-06:00:24:00 wed-06:00:24:00 thr-06:00:24:00 fri-06:00:24:00 sat-06:00:24:00 sun-06:00:24:00']
+#     # cursor_list = [x for x in input_csv][1:]
 
-    # for value in cursor_list:
-    for value in cursor:
+#     # for value in cursor_list:
+#     for value in cursor:
 
-        brand_name = value[0]
-        store_name = value[1]
-        store_type = value[2]
-        address_1 = value[3]
-        city = value[4]
-        state = value[5]
-        zipcode = value[6]
-        country_code = value[7]
-        phone_number = value[8]
-        primary_sic = value[9]
-        secondary_sic = value[10]
-        latitude = value[11]
-        longitude = value[12]
-        raw_business_hours = value[13]
-        print
-        print 'raw_business_hours', raw_business_hours
-        print '.+'*100
-        # formated_business_hours = y
-        brand_id = value[14]
-        raw_address = value[15]
-        updated_date = value[16]
-        url = value[17]
-        #for csv_indexes
-        # brand_id = value[15]
-        # raw_address = value[16]
-        # updated_date = value[17]
-        # url = value[18]
-        if value is None:
-            continue
-        # value = value[13]  # Access tuple from dataset
-        value = raw_business_hours
-        # value = value  # from cursor list
-        # print value
-        if not isinstance(value, str) and not isinstance(value, unicode):
-            continue
+#         brand_name = value[0]
+#         store_name = value[1]
+#         store_type = value[2]
+#         address_1 = value[3]
+#         city = value[4]
+#         state = value[5]
+#         zipcode = value[6]
+#         country_code = value[7]
+#         phone_number = value[8]
+#         primary_sic = value[9]
+#         secondary_sic = value[10]
+#         latitude = value[11]
+#         longitude = value[12]
+#         raw_business_hours = value[13]
+#         print
+#         print 'raw_business_hours', raw_business_hours
+#         print '.+'*100
+#         # formated_business_hours = y
+#         brand_id = value[14]
+#         raw_address = value[15]
+#         updated_date = value[16]
+#         url = value[17]
+#         #for csv_indexes
+#         # brand_id = value[15]
+#         # raw_address = value[16]
+#         # updated_date = value[17]
+#         # url = value[18]
+#         if value is None:
+#             continue
+#         # value = value[13]  # Access tuple from dataset
+#         value = raw_business_hours
+#         # value = value  # from cursor list
+#         # print value
+#         if not isinstance(value, str) and not isinstance(value, unicode):
+#             continue
 
-        value = value.replace("\n", " ").replace("\\n", " ").strip().lower()
+#         value = value.replace("\n", " ").replace("\\n", " ").strip().lower()
 
-        if value is "":
-            continue
+#         if value is "":
+#             continue
 
-        validated_check = validate_input_string(value)
+#         validated_check = validate_input_string(value)
 
-        if validated_check is isinstance(validated_check, bool):
-            try:
-                y = check_string_for_date(value)
-                print 'befor replace_keywords', y
-                y = replace_keywords(y)
-                print 'after replace_keywords', y
-                # y = replace_french_from_to(y)
-                if 'today' in y:
-                    y = replace_relative_days(y)
+#         if validated_check is isinstance(validated_check, bool):
+#             try:
+#                 y = check_string_for_date(value)
+#                 print 'befor replace_keywords', y
+#                 y = replace_keywords(y)
+#                 print 'after replace_keywords', y
+#                 # y = replace_french_from_to(y)
+#                 if 'today' in y:
+#                     y = replace_relative_days(y)
 
-                y = replace_hours_without_time_delimeter(y)
-                # print y, 'replace_hours_without_time_delimeter'
-                y = convert_to_24h(y)
-                # print y, 'convert_to_24h'
+#                 y = replace_hours_without_time_delimeter(y)
+#                 # print y, 'replace_hours_without_time_delimeter'
+#                 y = convert_to_24h(y)
+#                 # print y, 'convert_to_24h'
 
-                y = replace_open_close_delimeter(y)
-                # print y, 'replace_open_close_delimeter'
-                y = replace_hour_groups(y)
-                # print y, 'replace_hour_groups'
-                not_matched = replace_hour_groups(y)
-                y = string_to_dict(y)
+#                 y = replace_open_close_delimeter(y)
+#                 # print y, 'replace_open_close_delimeter'
+#                 y = replace_hour_groups(y)
+#                 # print y, 'replace_hour_groups'
+#                 not_matched = replace_hour_groups(y)
+#                 y = string_to_dict(y)
 
-                if isinstance(y, dict):
-                    try:
-                        print 'before day expantion : ', y
+#                 if isinstance(y, dict):
+#                     try:
+#                         print 'before day expantion : ', y
 
-                        y = day_expand(y)
-                        # y = sorted_output(y)
-                        print 'after day expantion : ', y
-                        debug_y = debug_formated_output_dict(y)
-                        print 'after debug_formated_output_dict : ', debug_y
-                        y = formated_output_dict(y)
-                        print 'after formated_output_dict : ', y
+#                         y = day_expand(y)
+#                         # y = sorted_output(y)
+#                         print 'after day expantion : ', y
+#                         debug_y = debug_formated_output_dict(y)
+#                         print 'after debug_formated_output_dict : ', debug_y
+#                         y = formated_output_dict(y)
+#                         print 'after formated_output_dict : ', y
 
-                    except:
-                        raise
-                        y = 'Unhandled Day expantion Failed : {0}'.format(y)
-                else:
-                        y = 'Unhandled Unable to convert in dict : {0}'.format(y)
-            except Exception as e:
-                raise
-                # print e, value
-                y = 'Unhandled formats : {0}'.format(value)
-                pass
-        else:
-            y = validated_check
-            debug_y = y
-            not_matched = replace_hour_groups(y)
-        # print y
-        formated_business_hours = y
-        debug_formated_business_hours = debug_y
-        # break
+#                     except:
+#                         raise
+#                         y = 'Unhandled Day expantion Failed : {0}'.format(y)
+#                 else:
+#                         y = 'Unhandled Unable to convert in dict : {0}'.format(y)
+#             except Exception as e:
+#                 raise
+#                 # print e, value
+#                 y = 'Unhandled formats : {0}'.format(value)
+#                 pass
+#         else:
+#             y = validated_check
+#             debug_y = y
+#             not_matched = replace_hour_groups(y)
+#         # print y
+#         formated_business_hours = y
+#         debug_formated_business_hours = debug_y
+#         # break
 
-        # output_csv.writerow([' '.join(value.split()).encode('ascii', 'ignore'), y, ' '.join(not_matched.split())])
-        output_csv.writerow([brand_name, store_name, store_type, address_1, city, state, zipcode, country_code, phone_number, primary_sic, secondary_sic, latitude, longitude, raw_business_hours, debug_formated_business_hours, formated_business_hours, brand_id, raw_address, updated_date, url])
-        # break
-def accuracy_csv():
-        accuracy_csv = csv.reader(open("total_with_bad_updated"+ ' store_hours.csv', 'rb'))
-        accuracy_csv = filter(None,[x for x in accuracy_csv][1:])
+#         # output_csv.writerow([' '.join(value.split()).encode('ascii', 'ignore'), y, ' '.join(not_matched.split())])
+#         output_csv.writerow([brand_name, store_name, store_type, address_1, city, state, zipcode, country_code, phone_number, primary_sic, secondary_sic, latitude, longitude, raw_business_hours, debug_formated_business_hours, formated_business_hours, brand_id, raw_address, updated_date, url])
+#         # break
+# def accuracy_csv():
+#         accuracy_csv = csv.reader(open("total_with_bad_updated"+ ' store_hours.csv', 'rb'))
+#         accuracy_csv = filter(None,[x for x in accuracy_csv][1:])
 
-        total  = len([x for x in accuracy_csv])
-        print ("Total rows %d" % total)
+#         total  = len([x for x in accuracy_csv])
+#         print ("Total rows %d" % total)
 
-        unhandled = len([x for x in accuracy_csv if  'Unhandled' in x[1]  and 'invalid' in x[1] ])
-        per_accuracy = ((total - unhandled) * 100)/total
-        # print per_accuracy
-        print ("Unhandled %d" % unhandled)
-        print ("Accuracy  %d" % per_accuracy)
+#         unhandled = len([x for x in accuracy_csv if  'Unhandled' in x[1]  and 'invalid' in x[1] ])
+#         per_accuracy = ((total - unhandled) * 100)/total
+#         # print per_accuracy
+#         print ("Unhandled %d" % unhandled)
+#         print ("Accuracy  %d" % per_accuracy)
 
 
-        unhandled_csv = csv.writer(open('updated_bad_unhandled_store_hours.csv', 'wb'))
-        unhandled_csv.writerow(['input_string', 'output_dict', "unmatched"])
-        for row in accuracy_csv:
-            if 'Unhandled' in row[1]:
-                unhandled_csv.writerow(row)
+#         unhandled_csv = csv.writer(open('updated_bad_unhandled_store_hours.csv', 'wb'))
+#         unhandled_csv.writerow(['input_string', 'output_dict', "unmatched"])
+#         for row in accuracy_csv:
+#             if 'Unhandled' in row[1]:
+#                 unhandled_csv.writerow(row)
 
 if __name__ == "__main__":
     # all_brands_output = csv.writer(open('all_brands_output.csv', 'wb'))
@@ -754,8 +760,8 @@ if __name__ == "__main__":
     #    SELECT brand_name FROM O_O_DATA.scrapers_hoo
     #    group by brand_name;
     #    """
-    brand_name = "Chipotle"
-    sheet_link = 'https://docs.google.com/spreadsheets/d/1hDarBlM_Mq1Xg0j8kYiMeeDLMgdd2h0Gjh9QdG-WaHw/edit?ts=58eb38e5#gid=1886328971'
+    brand_name = "Whole Foods"
+    sheet_link = 'https://docs.google.com/spreadsheets/d/1lGCsBsRTNgmPn8STWU_37-LRql5mWLbHJ9pl77g-R38/edit#gid=2140337586'
 
     update_gsheet(brand_name, sheet_link)
     # main_test()
@@ -768,5 +774,5 @@ if __name__ == "__main__":
         # # break
 
 
-cursor.close()
-cnx.close()
+# cursor.close()
+# cnx.close()
