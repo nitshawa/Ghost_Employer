@@ -40,16 +40,16 @@ replacements = {
     'wed': ['wednesday', 'mittwoch', 'mercredi', 'mircoles', 'wed-wed', 'wen','we ','we:'],
     'wed-':['we-'],
 
-    'thu': ['thursday', 'donnerstag', 'jeudi', 'jueves', 'thurs', 'thur','thr', 'thu-thu', 'th ','th-', 'th:'],#, 'th'], # 'th' is making sometime breaks the code like in Bonefish,  HEB foods, when day expention is required
+    'thu': ['thursday', 'donnerstag', 'jeudi', 'jueves', 'thurs', 'thur','thr', 'thu-thu', 'th ', 'th:'],#, 'th'], # 'th' is making sometime breaks the code like in Bonefish,  HEB foods, when day expention is required
     'thu-':['th-'],
 
-    'fri': ['friday', 'freitag', 'vendredi', 'viernes', 'fir','fri-fri',  'fr ', 'fr-',  'fr:'],
+    'fri': ['friday', 'freitag', 'vendredi', 'viernes', 'fir','fri-fri',  'fr ',  'fr:'],
     'fri-':['fr-'],
 
-    'sat': ['saturday', 'samstag', 'samedi', 'sabado', 'sat-sat', 'sa ', 'sa-', 'sa:'],
+    'sat': ['saturday', 'samstag', 'samedi', 'sabado', 'sat-sat', 'sa ', 'sa:'],
     'sat-':['sa-'],
 
-    'sun': ['sunday', 'sonntag', 'dimanche', 'domingo', 'sun-sun' , 'su ', 'su-', 'su:'],
+    'sun': ['sunday', 'sonntag', 'dimanche', 'domingo', 'sun-sun' , 'su ', 'su:'],
     'sun-':['su-'],
 
     # 'am': ['a.m', 'A.M.', 'AM', 'am.', '-am', 'a m', 'a.m.', 'am'],
@@ -760,7 +760,7 @@ if __name__ == "__main__":
     #    SELECT brand_name FROM O_O_DATA.scrapers_hoo
     #    group by brand_name;
     #    """
-    brand_name = "Whole Foods"
+    brand_name = "Whole Foods Market"
     sheet_link = 'https://docs.google.com/spreadsheets/d/1lGCsBsRTNgmPn8STWU_37-LRql5mWLbHJ9pl77g-R38/edit#gid=2140337586'
 
     update_gsheet(brand_name, sheet_link)
