@@ -37,13 +37,13 @@ replacements = {
     'thu': ['thursday', 'donnerstag', 'jeudi', 'jueves', 'thurs', 'thur','thr', 'thu-thu', 'th ', 'th:'],#, 'th'],
     'thu-':['th-'],
 
-    'fri': ['friday', 'freitag', 'vendredi', 'viernes', 'fir','fri-fri',  'fr ', 'fr-',  'fr:'],
+    'fri': ['friday', 'freitag', 'vendredi', 'viernes', 'fir','fri-fri',  'fr ',  'fr:'],
     'fri-':['fr-'],
 
-    'sat': ['saturday', 'samstag', 'samedi', 'sabado', 'sat-sat', 'sa ', 'sa-', 'sa:'],
+    'sat': ['saturday', 'samstag', 'samedi', 'sabado', 'sat-sat', 'sa ', 'sa:'],
     'sat-':['sa-'],
 
-    'sun': ['sunday', 'sonntag', 'dimanche', 'domingo', 'sun-sun' , 'su ', 'su-', 'su:'],
+    'sun': ['sunday', 'sonntag', 'dimanche', 'domingo', 'sun-sun' , 'su ', 'su:'],
     'sun-':['su-'],
 
     # 'am': ['a.m', 'A.M.', 'AM', 'am.', '-am', 'a m', 'a.m.', 'am'],
@@ -225,6 +225,7 @@ def replace_with_unstructured_hours(matchobj):
 
 def replace_open_close_delimeter(value):
     # eg:  0000-0400 / 0500-1400 lunch break
+    # add . as well b/w hours and minute identifier if numerous cases occur
     pattern = r'(\d{1,2}:\d{2}[:\d{2}]*)[\D]*(\d{1,2}:\d{2}[:\d{2}]*)'
     # pattern = r'(\d{2}:\d{2})[\s-]*(\d{2}:\d{2})'
     return re.sub(pattern, replace_with_unstructured_hours, value)
@@ -465,7 +466,7 @@ def formated_output_dict(value):
 
 
 def main_test():
-    values = [" Monday: 11:00 - 23:00, Tuesday: 11:00 - 23:00, Wednesday: 11:00 - 23:00, Thursday: 11:00 - 23:00, Friday: 11:00 - 0:00, Saturday: 11:00 - 0:00, Sunday: 11:00 - 22:00"]
+    values = ["Su-Th 11:00-21:00, Fr 11:00-22:00, Sa 10:00-22:00"]
     for value in values:
         if value is None:
             continue
