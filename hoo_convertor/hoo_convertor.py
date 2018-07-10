@@ -4,9 +4,12 @@
 import sys
 import re
 import json
-import ast
+
 import datetime
 from dateutil import parser
+
+import unicodedata
+
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
@@ -20,22 +23,22 @@ replacements = json.loads(replacements)
 
 
 replacement_7days = {
-                                'mon-sun : 00:00-00:00':
-                                [
-                                    '24/7',
-                                    '24-7',
-                                    'open 24/7',
-                                    'all day',
-                                    'all:day',
-                                    '24 hours',
-                                    'open 24 hours',
-                                    '24 Hours Open',
-                                    'open 24 hours per day may vary',
-                                    'open 24 hrs',
-                                    '24 hours, 7 days a week',
-                                    '24 hours open'
-                                ]
-                                    }
+                    'mon-sun : 00:00-00:00':
+                    [
+                        '24/7',
+                        '24-7',
+                        'open 24/7',
+                        'all day',
+                        'all:day',
+                        '24 hours',
+                        'open 24 hours',
+                        '24 Hours Open',
+                        'open 24 hours per day may vary',
+                        'open 24 hrs',
+                        '24 hours, 7 days a week',
+                        '24 hours open'
+                    ]
+                    }
 
 def remove_html_tags(value):
   tags = re.compile('<.*?>')
@@ -55,6 +58,7 @@ def replace_24_by_7(value):
 
 
 def replace_keywords(value):
+    value = check_string_for_date(value)
     value = remove_html_tags(value)
     value = replace_24_by_7(value)
     value = value.lower()
@@ -85,11 +89,15 @@ def add_trailing_zeros(matchobj):
 def replace_hours_without_time_delimeter(value):
     # if any(x not in value for x in ['am', 'pm', 'p', 'a']) and value == '00:00-00:00':
         # value = re.sub(r'(\d+)', add_trailing_zeros, value)
+    value = replace_keywords(value)
+    if 'today' in value:
+        value = replace_relative_days(value)
 
     return re.sub(r'(\d{1,2})(\d{2})', r'\1:\2', value)
 
 
-def replace_hour_groups(value):
+def replace_hour_groups(text):
+    value = replace_open_close_delimeter(text)
     print 'value in replace hours groups', value
     p = r'\[(\(\d{2}:\d{2},\d{2}:\d{2}\))\]\s*/\s*\[(\(\d{2}:\d{2},\d{2}:\d{2}\))\]'
     return re.sub(p, r'[\1,\2]', value)
@@ -153,6 +161,7 @@ def replace_hours_for_match(matchobj):
 
 
 def convert_to_24h(value):
+    value = replace_hours_without_time_delimeter(value)
     pattern =  r"""(?P<hour>\d{1,2})[:hH]{0,1}(?P<min>\d{0,2})[:.hH]{0,1}(?P<sec>\d{0,2})[' ']{0,1}(?P<ampm>a |am|a.m.|am.|a.m|a m|a|p |pm|p.m.|pm.|p.m|p m|p)"""
     raw_convertion = re.sub(pattern, replace_hours_for_match, value)
     print  'raw--------------', raw_convertion
@@ -176,6 +185,7 @@ def replace_with_unstructured_hours(matchobj):
 
 
 def replace_open_close_delimeter(value):
+    value = convert_to_24h(value)
     # eg:  0000-0400 / 0500-1400 lunch break
     pattern = r'(\d{1,2}:\d{2}[:\d{2}]*)[\D]*(\d{1,2}:\d{2}[:\d{2}]*)'
     # pattern = r'(\d{2}:\d{2})[\s-]*(\d{2}:\d{2})'
@@ -184,7 +194,7 @@ def replace_open_close_delimeter(value):
 
 def time_day_dict(value):
     days_hours = {}
-    pattern = "(\[.*?\])"
+    pattern = r"(\[.*?\])"
     hours = re.findall(pattern, value)
     indexer = 0
 
@@ -199,15 +209,11 @@ def time_day_dict(value):
         indexer = start
     return days_hours
 
-def string_to_dict(value):
-    """
-        input string must have a format as
-        mon: [(08:45,19:30)], tue: [(08:45,19:30)], wed: [(08:45,19:30)], thu: [(08:45,19:30)], fri: [(08:45,20:00)], sat: [(08:45,19:30)]
-        mon. & thu. [(10:00,20:00)],tue., wed., fri. [(10:00,17:30)],sat. [(10:00,17:30)],sun. [(24:00,17:00)]
-    """
+def string_to_dict(text):
+    value  = replace_hour_groups(text)
     print 'entering string to dict ', value
     days_hours = {}
-    pattern = "(\[.*?\])"
+    pattern = r"(\[.*?\])"
     hours = re.findall(pattern, value)
     indexer = 0
     print 'value.find("[")', value.find("[")
@@ -230,31 +236,18 @@ def string_to_dict(value):
     return days_hours
 
 
-def day_expand(days_hours):
-    """
-    Input must be dict.
-    -- Must have a "-" (hyphen) as separator or day's keys have start and end eg. mon - thru etc...
-        -- In this case function would return the expanded dict with 7 days.
-            If any day is missing then only it will put value as blank list.
-    -- if multiple days comes with out separator eg.. tue, wed, thru... etc..
-        -- Function would return multiple days with same hours
-            eg.. tue : [00:23:59], wed : [00:23:59], thru : [00:23:59]
-    unhandled cases:
-        if both separator and multiple days key appears : eg..
-        mon-fri, sat: 9:00 am - 8:00 pm
-        mon-tue-wed-fri 8.30am-6.30pm , thur 8.30am-5.30pm , sat 9am-12noon , sun closed
-
-    """
-
+def day_expand(text):
+    days_hours = string_to_dict(text)
     days_hours_copy = {k: v for k, v in days_hours.iteritems() if v}
+
     days = [x for x in days_hours.keys()]
     for day, hours in days_hours_copy.iteritems():
         if '-' in day:
 
             """if dash separator given in keys"""
             del days_hours[day]
-
-            start_day_index, end_day_index = [day_list.index(x.strip(' ;/,')) for x in day.split('-')]
+            
+            start_day_index, end_day_index = [day_list.index(x.strip(' ();/,')) for x in day.split('-')]
 
             if end_day_index <= start_day_index:
                 expanded_days = day_list[start_day_index:] + day_list[:end_day_index + 1]
@@ -274,16 +267,19 @@ def day_expand(days_hours):
                     days_hours[multiple_day] = hours
 
     '''updating dict with missing day as blank'''
+
     for day in day_list:
         if day not in days_hours.keys():
             days_hours[day] = []
 
     if  sorted(days_hours.keys()) == sorted(day_list) :
+
         return days_hours
     else:
         # for k, v in days_hours.iteritems():
         #     if k not in day_list:
         #         k = 'unknown day'
+
         return 'Invalid day name -> {}'.format(days_hours)
 
 def sorted_output(value):
@@ -364,6 +360,9 @@ def debug_formated_output_dict(value):
     return formated_output
 
 def formated_output_dict(value):
+    print value, 'formated_output_dict'
+    value = day_expand(value)
+    print 'after day expand > > > > ', value
     final_output = []
     unique = set([x for x in value.values() if type(x) is not list ])
     formated_output = {}
@@ -403,6 +402,40 @@ def formated_output_dict(value):
     if len(final_output) == 0:
         return []
     return final_output
+
+
+
+def convert_operating_hours(text):
+    assert type(text) == str, "Invalid type of value {}".format(type(text))
+    text = text.lower()
+    text = text.strip(' ,\n')
+    text = text.replace('\n', ' ').replace('\\n', ' ')
+    validated_check = validate_input_string(text) # check if invalid words are not present in value
+    assert type(validated_check) == bool, "{}".format(validated_check)
+    print validated_check
+
+    return formated_output_dict(text)
+print convert_operating_hours('Monday to Friday: 11:30 to 13:00/16:00 to 20:30, Saturday : 08:30 to 20:30 Sunday: 09:00 to 13:00')
+
+exit()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def main_test(value):
@@ -455,6 +488,7 @@ def main_test(value):
     print y
 
 
+
 if __name__ == "__main__":
-    value = "Weekdays: 10am-8pm/9pm-12am, Weekends: store"
+    value = "Weekdays: 10am-8pm/9pm-12am"
     main_test(value)
